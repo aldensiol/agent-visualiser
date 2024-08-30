@@ -1,6 +1,6 @@
-# Streamlit-Agent-Visualizer: A Visual Learning Tool for Agentic Workflows
+# Streamlit-Agent-Visualiser: A Visual Learning Tool for Agentic Workflows
 
-Welcome to the **Streamlit-Agent-Visualizer**! This project is designed as a visual and interactive tool to learn and explore the fascinating world of Retrieval-Augmented Generation (RAG) systems and Agentic workflows.
+Welcome to the **Streamlit-Agent-Visualiser**! This project is designed as a visual and interactive tool to learn and explore the fascinating world of Retrieval-Augmented Generation (RAG) systems and Agentic workflows.
 
 ## 🌟 Project Overview
 
@@ -48,7 +48,7 @@ This chatbot serves as both a personal learning tool and an educational platform
     streamlit run streamlit_app.py
 
 ## 🌐 Project Structure
-    ```bash
+    ```
     streamlit-rag-chatbot/
     │
     ├── notebooks/                      # Jupyter Notebooks for exploratory analysis
@@ -76,3 +76,4 @@ This chatbot serves as both a personal learning tool and an educational platform
     ├── README.md                       # Project documentation
     ├── requirements.txt                # Python dependencies
     └── streamlit_app.py                # Main Streamlit application file
+
