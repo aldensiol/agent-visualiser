@@ -73,12 +73,16 @@ This chatbot serves as both a personal learning tool and an educational platform
     │   ├── ui/                              # User interface components
     │   │   ├── __init__.py                  
     │   │   └── components.py                # UI components used in the Streamlit app
-    │   └── vector/                          # Vector database management (Zilliz/Milvus)
-    │       ├── __init__.py                  
-    │       ├── create_collection.py         # Script to create vector collections
-    │       ├── create_index.py              # Script to create vector indices
-    │       ├── query_index.py               # Script to query vector indices
-    │       └── utils.py                     # Utility functions for parsing and vector operations
+    │   ├── vector/                          # Vector database management (Zilliz/Milvus)
+    │   │   ├── __init__.py                  
+    │   │   ├── create_collection.py         # Script to create vector collections
+    │   │   ├── create_index.py              # Script to create vector indices
+    │   │   ├── query_index.py               # Script to query vector indices
+    │   │   └── utils.py                     # Utility functions for parsing and vector operations
+    │   ├── __init__.py
+    │   ├── app.py                           # API endpoints
+    │   └── main.py                          # FastAPI Ports
+    │
     ├── .gitignore                           
     ├── README.md                            # Project documentation and overview
     ├── requirements.txt                     # Python dependencies required for the project

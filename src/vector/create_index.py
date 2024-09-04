@@ -4,7 +4,7 @@ import pickle
 from alive_progress import alive_bar
 from llama_index.core import Document
 from pymilvus import Collection
-from src.services.services import bge_embed_model, spalde_embed_model
+from src.services.services import bge_embed_model, splade_embed_model
 from typing import List, Tuple
 
 nest_asyncio.apply()
@@ -30,7 +30,7 @@ def get_required_data(final_docs: List[Document]) -> Tuple[List[str], List[str],
 
 def get_dense_and_sparse_embeddings(all_texts: List[str]):
     dense_embeddings_list = list(bge_embed_model.embed(all_texts))
-    sparse_embeddings_list = spalde_embed_model.encode_documents(all_texts)
+    sparse_embeddings_list = splade_embed_model.encode_documents(all_texts)
     
     return dense_embeddings_list, sparse_embeddings_list
 

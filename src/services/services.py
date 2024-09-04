@@ -43,7 +43,7 @@ bge_embed_model = TextEmbedding(model_name="BAAI/bge-large-en-v1.5")
 
 openai_embed_model = OpenAIEmbeddings(model_name="text-embedding-3-large")
 
-spalde_embed_model = model.sparse.SpladeEmbeddingFunction(
+splade_embed_model = model.sparse.SpladeEmbeddingFunction(
     model_name="naver/splade-cocondenser-ensembledistil",
     device="cpu",
 )

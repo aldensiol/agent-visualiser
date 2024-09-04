@@ -1,9 +1,9 @@
 from pymilvus import AnnSearchRequest, RRFRanker
-from src.services.services import collection, bge_embed_model, spalde_embed_model
+from src.services.services import collection, bge_embed_model, splade_embed_model
 
 def hybrid_search(query: str) -> str:
     dense_embedding = list(bge_embed_model.query_embed(query))[0]
-    sparse_embedding = list(spalde_embed_model.encode_queries([query]))
+    sparse_embedding = list(splade_embed_model.encode_queries([query]))
     
     search_results = collection.hybrid_search(
             reqs=[
