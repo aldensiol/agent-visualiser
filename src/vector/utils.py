@@ -78,7 +78,6 @@ def parse_docs(file_location: str, data_folder: Optional[str] = None) -> List[Do
         print("File: " + str(file_name))
         doc_path = os.path.join(file_location, file_name)
         modified_file_name = os.path.splitext(file_name)[0].lower().replace(' ', '_')
-        data_path = os.path.join(data_folder, modified_file_name + '.pkl')
 
         # results in a list of Document Objects
         documents = parser.load_data(doc_path)
@@ -96,6 +95,7 @@ def parse_docs(file_location: str, data_folder: Optional[str] = None) -> List[Do
         all_docs.append(final_docs)
         
         if data_folder:
+            data_path = os.path.join(data_folder, modified_file_name + '.pkl')
             pickle.dump(final_docs, open(data_path, "wb"))
     
     return [item for sublist in all_docs for item in sublist]
