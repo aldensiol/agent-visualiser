@@ -48,32 +48,38 @@ This chatbot serves as both a personal learning tool and an educational platform
     streamlit run streamlit_app.py
 
 ## 🌐 Project Structure
-    ```
-    streamlit-rag-chatbot/
-    │
-    ├── notebooks/                      # Jupyter Notebooks for exploratory analysis
-    │   └── agentic_flow.ipynb          # Notebook for agentic flow exploration
-    │
-    ├── src/                            # Source code for the chatbot
-    │   ├── chatbot/                    # Core chatbot logic
-    │   │   ├── prompts/                # Prompts and agent logic
-    │   │   │   ├── prompts.py          # Predefined prompts for the chatbot
-    │   │   │   ├── __init__.py         
-    │   │   ├── agents.py               # Agent management and decision making logic
-    │   │   ├── utils.py                # Utility functions
-    │   │
-    │   ├── graph/                      # Graph-based components
-    │   │   ├── __init__.py             
-    │   │   ├── build_graph.py          # Script to build and initialize the knowledge graph
-    │   │   ├── query_graph.py          # Query functions for interacting with the graph database
-    │   │
-    │   ├── ui/                         # User Interface components for Streamlit
-    │   │   ├── __init__.py             
-    │   │   ├── components.py           # Streamlit UI components and layout
-    │
-    ├── .env                            # Environment variables and API keys
-    ├── .gitignore                      # Git ignore file
-    ├── README.md                       # Project documentation
-    ├── requirements.txt                # Python dependencies
-    └── streamlit_app.py                # Main Streamlit application file
-
+    STREAMLIT-AGENT/
+    ├── notebooks/                           # Jupyter notebooks for different workflows
+    │   ├── agentic_flow.ipynb               # Uses LangGraph to build an Agentic RAG System
+    │   ├── graph_ingestion.ipynb            # Ingests documents into a knowledge graph
+    │   └── zillis_ingestion.ipynb           # Ingests documents into a vector database (Zilliz/Milvus)
+    ├── src/                                 
+    │   ├── chatbot/                         # Chatbot logic and related scripts
+    │   │   ├── prompts/                     # Contains prompt templates and initialisations
+    │   │   │   ├── prompts.py               # Script for handling chatbot prompts
+    │   │   ├── agents.py                    # Defines various agent behaviors
+    │   │   ├── utils.py                     # Utility functions for the chatbot
+    │   │   ├── workflow.py                  # Workflow management for the chatbot processes
+    │   │   └── __init__.py                 
+    │   ├── data/                            # Data-related scripts and management
+    │   ├── graph/                           # Knowledge graph handling
+    │   │   ├── __init__.py                  
+    │   │   ├── build_graph.py               # Script to build the knowledge graph
+    │   │   └── query_graph.py               # Script to query the knowledge graph
+    │   ├── pdfs/                            # PDF handling or storage
+    │   ├── services/                        # Service layer for backend functionality
+    │   │   ├── __init__.py                 
+    │   │   └── services.py                  # Core service implementations
+    │   ├── ui/                              # User interface components
+    │   │   ├── __init__.py                  
+    │   │   └── components.py                # UI components used in the Streamlit app
+    │   └── vector/                          # Vector database management (Zilliz/Milvus)
+    │       ├── __init__.py                  
+    │       ├── create_collection.py         # Script to create vector collections
+    │       ├── create_index.py              # Script to create vector indices
+    │       ├── query_index.py               # Script to query vector indices
+    │       └── utils.py                     # Utility functions for parsing and vector operations
+    ├── .gitignore                           
+    ├── README.md                            # Project documentation and overview
+    ├── requirements.txt                     # Python dependencies required for the project
+    └── streamlit_app.py                     # Main entry point for the Streamlit application
