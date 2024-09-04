@@ -69,7 +69,8 @@ def convert_nodes_to_documents(text_nodes, object_nodes, source):
 def make_dir(data_folder):
     os.makedirs(data_folder, exist_ok=True)
 
-def parse_docs(file_location, data_folder):
+def parse_docs(file_location: str, data_folder: Optional[str] = None) -> List[Document]:
+    all_docs = []
     for file_name in os.listdir(file_location):
         if not file_name.endswith(".pdf"):
             continue
@@ -92,15 +93,13 @@ def parse_docs(file_location, data_folder):
         text_nodes, objects = node_parser.get_nodes_and_objects(raw_nodes)
         
         final_docs = convert_nodes_to_documents(text_nodes, objects, modified_file_name)
+        all_docs.append(final_docs)
+        
+        if data_folder:
+            pickle.dump(final_docs, open(data_path, "wb"))
+    
+    return [item for sublist in all_docs for item in sublist]
 
-        pickle.dump(final_docs, open(data_path, "wb"))
-        
-def make_and_parse_docs(file_location, data_folder):
-    make_dir(data_folder)
-    parse_docs(data_folder, file_location)
-    final_docs = get_final_docs(data_folder)
-    return final_docs
-        
 def read_pickles(data_folder: str) -> List[Document]:
     doc_list = []
     for file_name in os.listdir(data_folder):
@@ -166,8 +165,13 @@ def get_final_docs(data_folder: Optional[str] = None, doc_list: Optional[List[Do
     long_docs, short_docs = further_split_long_docs(doc_list)
     final_docs = recursive_chunk_documents(long_docs, short_docs)
     return final_docs
-
-def process_pdfs(file_location: str, data_folder: str) -> List[Document]:
-    docs = make_and_parse_docs(data_folder, file_location)
-    final_docs = get_final_docs(doc_list=docs)
+        
+def parse_and_process_docs(file_location, data_folder: Optional[str] = None) -> List[Document]:
+    if data_folder:
+        make_dir(data_folder)
+        all_docs = parse_docs(file_location=file_location, data_folder=data_folder)
+    else:
+        all_docs = parse_docs(file_location=file_location)
+        
+    final_docs = get_final_docs(doc_list=all_docs)
     return final_docs
