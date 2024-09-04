@@ -2,17 +2,14 @@ import nest_asyncio
 import pickle
 
 from alive_progress import alive_bar
-from pymilvus import (
-    utility,
-    CollectionSchema, DataType, FieldSchema, model,
-    connections, Collection, AnnSearchRequest, WeightedRanker, RRFRanker,
-)
+from llama_index.core import Document
+from pymilvus import Collection
 from src.services.services import bge_embed_model, spalde_embed_model
-from typing import List
+from typing import List, Tuple
 
 nest_asyncio.apply()
 
-def get_required_data(final_docs):
+def get_required_data(final_docs: List[Document]) -> Tuple[List[str], List[str], List[str]]:
     all_ids, all_texts, all_sources = [], [], []
 
     with alive_bar(len(final_docs), title='Metadata', force_tty=True) as bar:
@@ -31,18 +28,26 @@ def get_required_data(final_docs):
     
     return all_ids, all_texts, all_sources
 
-def get_dense_and_sparse_embeddings(all_texts, data_folder):
+def get_dense_and_sparse_embeddings(all_texts: List[str]):
     dense_embeddings_list = list(bge_embed_model.embed(all_texts))
     sparse_embeddings_list = spalde_embed_model.encode_documents(all_texts)
+    
+    return dense_embeddings_list, sparse_embeddings_list
+
+def save_embeddings(data_folder, dense_embeddings_list, sparse_embeddings_list) -> None:
     with open(f'{data_folder}/dense_embeddings.pkl', 'wb') as f:
         pickle.dump(dense_embeddings_list, f)
         
     with open(f'{data_folder}/sparse_embeddings.pkl', 'wb') as f:
         pickle.dump(sparse_embeddings_list, f)
-        
-    return dense_embeddings_list, sparse_embeddings_list
 
-def batch_ingestion(collection, all_ids, all_texts, all_sources, dense_embeddings_list, sparse_embeddings_list):
+def batch_ingestion(collection, final_docs):
+    # Get required data
+    all_ids, all_texts, all_sources = get_required_data(final_docs)
+    # Get dense and sparse embeddings
+    dense_embeddings_list, sparse_embeddings_list = get_dense_and_sparse_embeddings(all_texts)
+    
+    # Start ingestion process
     data = [
         all_ids,
         all_texts,

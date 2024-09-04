@@ -7,7 +7,7 @@ import uuid
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from llama_index.core import Document
 from src.services.services import parser, node_parser
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 nest_asyncio.apply()
 
@@ -69,7 +69,7 @@ def convert_nodes_to_documents(text_nodes, object_nodes, source):
 def make_dir(data_folder):
     os.makedirs(data_folder, exist_ok=True)
 
-def parse_docs(data_folder, file_location):
+def parse_docs(file_location, data_folder):
     for file_name in os.listdir(file_location):
         if not file_name.endswith(".pdf"):
             continue
@@ -95,7 +95,13 @@ def parse_docs(data_folder, file_location):
 
         pickle.dump(final_docs, open(data_path, "wb"))
         
-def read_pickles(data_folder):
+def make_and_parse_docs(file_location, data_folder):
+    make_dir(data_folder)
+    parse_docs(data_folder, file_location)
+    final_docs = get_final_docs(data_folder)
+    return final_docs
+        
+def read_pickles(data_folder: str) -> List[Document]:
     doc_list = []
     for file_name in os.listdir(data_folder):
         doc_path = os.path.join(data_folder, file_name)
@@ -151,8 +157,17 @@ def recursive_chunk_documents(long_docs: List[Document],
 
     return short_docs
 
-def get_final_docs(data_folder):
-    doc_list = read_pickles(data_folder)
+def get_final_docs(data_folder: Optional[str] = None, doc_list: Optional[List[Document]] = None) -> List[Document]:
+    if doc_list is None:
+        if data_folder is None:
+            raise ValueError("Either data_folder or doc_list must be provided")
+        doc_list = read_pickles(data_folder)
+    
     long_docs, short_docs = further_split_long_docs(doc_list)
     final_docs = recursive_chunk_documents(long_docs, short_docs)
+    return final_docs
+
+def process_pdfs(file_location: str, data_folder: str) -> List[Document]:
+    docs = make_and_parse_docs(data_folder, file_location)
+    final_docs = get_final_docs(doc_list=docs)
     return final_docs
