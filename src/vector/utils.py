@@ -123,6 +123,8 @@ def further_split_long_docs(doc_list: List[Document]) -> Tuple[List[Document], L
                 long_docs.append(doc)
             else:
                 short_docs.append(doc)
+        else:
+            short_docs.append(doc)
     return long_docs, short_docs
                 
 def chunk_doc(doc: Document, text_splitter: RecursiveCharacterTextSplitter) -> List[Document]:
