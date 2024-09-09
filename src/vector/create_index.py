@@ -1,4 +1,3 @@
-import nest_asyncio
 import pickle
 
 from alive_progress import alive_bar
@@ -6,8 +5,6 @@ from llama_index.core import Document
 from pymilvus import Collection
 from src.services.services import bge_embed_model, splade_embed_model
 from typing import List, Tuple
-
-nest_asyncio.apply()
 
 def get_required_data(final_docs: List[Document]) -> Tuple[List[str], List[str], List[str]]:
     all_ids, all_texts, all_sources = [], [], []

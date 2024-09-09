@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.app import upload_vector_router, upload_graph_router
+from src.app import delete_vector_router, upload_vector_router, upload_graph_router
 
 app = FastAPI(title="UpdateDocumentsToAWS", version="fastapi:1.0")
 
@@ -23,7 +23,8 @@ if environment == "dev":
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    
+
+app.include_router(delete_vector_router, prefix="/api")
 app.include_router(upload_vector_router, prefix="/api")
 app.include_router(upload_graph_router, prefix="/api")
 

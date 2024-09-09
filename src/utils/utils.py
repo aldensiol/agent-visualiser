@@ -1,4 +1,3 @@
-import nest_asyncio
 import os
 import pickle
 import re
@@ -7,8 +6,6 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from llama_index.core import Document
 from src.services.services import parser, node_parser, coref_nlp
 from typing import List, Tuple, Optional
-
-nest_asyncio.apply()
 
 def coref_text(text):
     coref_doc = coref_nlp(text.strip())

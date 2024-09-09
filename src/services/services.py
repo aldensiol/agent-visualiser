@@ -1,3 +1,4 @@
+import nest_asyncio
 import os
 import spacy
 
@@ -13,6 +14,8 @@ from llama_parse import LlamaParse
 from pymilvus import (
     model, connections, Collection
 )
+
+nest_asyncio.apply()
 
 load_dotenv()
 

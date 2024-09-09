@@ -1,10 +1,6 @@
-import nest_asyncio
-
 from llama_index.core import Document, PropertyGraphIndex
 from src.services.services import graph_store, relik, llama_llm, llama_openai_embed_model
 from typing import List
-
-nest_asyncio.apply()
 
 def delete_all_nodes(graph_store):
     graph_store.structured_query("""
