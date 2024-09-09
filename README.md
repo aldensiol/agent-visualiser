@@ -61,26 +61,38 @@ This chatbot serves as both a personal learning tool and an educational platform
     │   │   ├── utils.py                     # Utility functions for the chatbot
     │   │   ├── workflow.py                  # Workflow management for the chatbot processes
     │   │   └── __init__.py                 
+    │   │
     │   ├── data/                            # Data-related scripts and management
+    │   │
     │   ├── graph/                           # Knowledge graph database management (Neo4j)
     │   │   ├── __init__.py                  
     │   │   ├── build_graph.py               # Script to build the knowledge graph
     │   │   └── query_graph.py               # Script to query the knowledge graph
+    │   │
     │   ├── pdfs/                            # PDF handling or storage
+    │   │
+    │   ├── schema/                          # API Data Requests
+    │   │   ├── __init__.py                 
+    │   │   └── data.py                      # Pydantic handling
+    │   │
     │   ├── services/                        # Service layer for backend functionality
     │   │   ├── __init__.py                 
     │   │   └── services.py                  # Core service implementations
+    │   │
     │   ├── ui/                              # User interface components
     │   │   ├── __init__.py                  
     │   │   └── components.py                # UI components used in the Streamlit app
+    │   │
     │   ├── utils/                           # Vector database management (Zilliz/Milvus)
     │   │   ├── __init__.py                  
     │   │   └── utils.py                     # Utility Functions for Document Parsing
+    │   │
     │   ├── vector/                          # Vector database management (Zilliz/Milvus)
     │   │   ├── __init__.py                  
     │   │   ├── create_collection.py         # Script to create vector collections
     │   │   ├── create_index.py              # Script to create vector indices
     │   │   └── query_index.py               # Script to query vector indices
+    │   │
     │   ├── __init__.py
     │   ├── app.py                           # API endpoints
     │   └── main.py                          # FastAPI Ports
