@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from fastapi import APIRouter, HTTPException, status
 from src.schema.data import CreateIndexRequest
 from src.services.services import collection
-from src.vector.utils import parse_and_process_docs
+from src.utils.utils import parse_and_process_docs
 from src.vector.create_index import batch_ingestion, create_all_indexes
 
 upload_router = APIRouter()
