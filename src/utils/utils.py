@@ -2,22 +2,38 @@ import nest_asyncio
 import os
 import pickle
 import re
-import uuid
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from llama_index.core import Document
-from src.services.services import parser, node_parser
+from src.services.services import parser, node_parser, coref_nlp
 from typing import List, Tuple, Optional
 
 nest_asyncio.apply()
+
+def coref_text(text):
+    coref_doc = coref_nlp(text.strip())
+    resolved_text = ""
+
+    for token in coref_doc:
+        repres = coref_doc._.coref_chains.resolve(token)
+        if repres:
+            resolved_text += " " + " and ".join(
+                [
+                    t.text
+                    if t.ent_type_ == ""
+                    else [e.text for e in coref_doc.ents if t in e][0]
+                    for t in repres
+                ]
+            )
+        else:
+            resolved_text += " " + token.text
+
+    return resolved_text.strip()
 
 def remove_table_of_contents(text):
     pattern = r"TABLE OF CONTENTS.*?(?=#)"
     cleaned_text = re.sub(pattern, "", text, flags=re.DOTALL)
     return cleaned_text.strip()
-
-# Reset the index whenever you want to re-index the documents
-idx = [0]
 
 def convert_nodes_to_documents(text_nodes, object_nodes, source):
     """
@@ -33,36 +49,26 @@ def convert_nodes_to_documents(text_nodes, object_nodes, source):
     """
     documents = []
     for node in text_nodes:
-        text = node.text
-        doc_id = str(uuid.uuid4())
+        text = coref_text(node.text)
         doc = Document(
             text= text,
             metadata = {
-                "id": f"node_{idx[0]}_{doc_id}",
-                "start_char_idx": node.start_char_idx,
-                "end_char_idx": node.end_char_idx,
                 "is_table": False,
                 "source": source
             }
         )
         documents.append(doc)
-        idx[0] += 1
         
     for node in object_nodes:
-        text = node.text
-        doc_id = str(uuid.uuid4())
+        text = coref_text(node.text)
         doc = Document(
             text= text,
             metadata = {
-                "id": f"node_{idx[0]}_{doc_id}",
-                "start_char_idx": node.start_char_idx,
-                "end_char_idx": node.end_char_idx,
                 "is_table": True,
                 "source": source
             }
         )
         documents.append(doc)
-        idx[0] += 1
         
     return documents
 
@@ -70,6 +76,16 @@ def make_dir(data_folder):
     os.makedirs(data_folder, exist_ok=True)
 
 def parse_docs(file_location: str, data_folder: Optional[str] = None) -> List[Document]:
+    """
+    Parses PDF Folder and returns a list of Documents
+
+    Args:
+        file_location (str): PDF Folder Location
+        data_folder (Optional[str], optional): Folder to save pickles (Optional). Defaults to None.
+
+    Returns:
+        List[Document]: _description_
+    """
     all_docs = []
     for file_name in os.listdir(file_location):
         if not file_name.endswith(".pdf"):
@@ -133,9 +149,8 @@ def chunk_doc(doc: Document, text_splitter: RecursiveCharacterTextSplitter) -> L
         Document(
             text=chunk,
             metadata={
-                **doc.metadata,
-                'chunk_id': f"{doc.metadata.get('id', '')}_{i}",
-                'parent_id': doc.metadata.get('id', ''),
+                'is_table': doc.metadata['is_table'],
+                'source': doc.metadata.get('source', '')
             }
         )
         for i, chunk in enumerate(chunks)

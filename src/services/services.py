@@ -1,4 +1,5 @@
 import os
+import spacy
 
 from dotenv import load_dotenv
 from fastembed import TextEmbedding
@@ -6,6 +7,8 @@ from langchain_anthropic import ChatAnthropic
 from langchain_openai import OpenAIEmbeddings
 from llama_index.llms.anthropic import Anthropic
 from llama_index.core.node_parser import MarkdownElementNodeParser
+from llama_index.extractors.relik.base import RelikPathExtractor
+from llama_index.graph_stores.neo4j import Neo4jPropertyGraphStore
 from llama_parse import LlamaParse
 from pymilvus import (
     model, connections, Collection
@@ -25,6 +28,11 @@ ENDPOINT = os.getenv('ZILLIS_ENDPOINT')
 TOKEN = os.getenv('ZILLIS_TOKEN')
 
 connections.connect(uri=ENDPOINT, token=TOKEN)
+
+NEO4J_URL = "bolt://localhost:7687"
+NEO4J_USER = "neo4j"
+NEO4J_DATABASE = "neo4j"
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")
 
 llm = ChatAnthropic(
     model="claude-3-5-sonnet-20240620",
@@ -56,9 +64,23 @@ parser = LlamaParse(
     language="en",
 )
 
+relik = RelikPathExtractor(
+    model="relik-ie/relik-relation-extraction-small"
+)
+
+coref_nlp = spacy.load('en_core_web_lg')
+coref_nlp.add_pipe('coreferee')
+
 # instantiate node parser
 node_parser = MarkdownElementNodeParser(llm=llama_llm, num_workers=8)
 
 # Change name as needed
 COLLECTION_NAME = "vector_index"
 collection = Collection(name=COLLECTION_NAME)
+
+graph_store = Neo4jPropertyGraphStore(
+    username=NEO4J_USER,
+    password=NEO4J_PASSWORD,
+    url=NEO4J_URL,
+    refresh_schema=False,
+)
