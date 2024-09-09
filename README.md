@@ -62,7 +62,7 @@ This chatbot serves as both a personal learning tool and an educational platform
     │   │   ├── workflow.py                  # Workflow management for the chatbot processes
     │   │   └── __init__.py                 
     │   ├── data/                            # Data-related scripts and management
-    │   ├── graph/                           # Knowledge graph handling
+    │   ├── graph/                           # Knowledge graph database management (Neo4j)
     │   │   ├── __init__.py                  
     │   │   ├── build_graph.py               # Script to build the knowledge graph
     │   │   └── query_graph.py               # Script to query the knowledge graph
@@ -73,12 +73,14 @@ This chatbot serves as both a personal learning tool and an educational platform
     │   ├── ui/                              # User interface components
     │   │   ├── __init__.py                  
     │   │   └── components.py                # UI components used in the Streamlit app
+    │   ├── utils/                           # Vector database management (Zilliz/Milvus)
+    │   │   ├── __init__.py                  
+    │   │   └── utils.py                     # Utility Functions for Document Parsing
     │   ├── vector/                          # Vector database management (Zilliz/Milvus)
     │   │   ├── __init__.py                  
     │   │   ├── create_collection.py         # Script to create vector collections
     │   │   ├── create_index.py              # Script to create vector indices
-    │   │   ├── query_index.py               # Script to query vector indices
-    │   │   └── utils.py                     # Utility functions for parsing and vector operations
+    │   │   └── query_index.py               # Script to query vector indices
     │   ├── __init__.py
     │   ├── app.py                           # API endpoints
     │   └── main.py                          # FastAPI Ports
