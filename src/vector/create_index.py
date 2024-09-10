@@ -1,4 +1,5 @@
 import pickle
+import uuid
 
 from alive_progress import alive_bar
 from llama_index.core import Document
@@ -11,10 +12,7 @@ def get_required_data(final_docs: List[Document]) -> Tuple[List[str], List[str],
 
     with alive_bar(len(final_docs), title='Metadata', force_tty=True) as bar:
         for doc in final_docs:
-            try:
-                doc_id = doc.metadata['chunk_id']
-            except:
-                doc_id = doc.metadata['id']
+            doc_id = str(uuid.uuid4())
             text = doc.text
             source = doc.metadata['source']
             

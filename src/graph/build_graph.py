@@ -1,5 +1,5 @@
 from llama_index.core import Document, PropertyGraphIndex
-from src.services.services import graph_store, relik, llama_llm, llama_openai_embed_model
+from src.services.services import llama_llm, llama_openai_embed_model, graph_store, relik
 from typing import List
 
 def delete_all_nodes(graph_store):

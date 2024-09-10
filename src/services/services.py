@@ -8,6 +8,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_openai import OpenAIEmbeddings
 from llama_index.llms.anthropic import Anthropic
 from llama_index.core.node_parser import MarkdownElementNodeParser
+from llama_index.embeddings.openai import OpenAIEmbedding
 from llama_index.extractors.relik.base import RelikPathExtractor
 from llama_index.graph_stores.neo4j import Neo4jPropertyGraphStore
 from llama_parse import LlamaParse
@@ -50,9 +51,9 @@ llama_llm = Anthropic(
     temperature=0.0
 )
 
+print("Loading in Embedding Models...")
 bge_embed_model = TextEmbedding(model_name="BAAI/bge-large-en-v1.5")
-
-openai_embed_model = OpenAIEmbeddings(model_name="text-embedding-3-large")
+llama_openai_embed_model = OpenAIEmbedding(model_name="text-embedding-3-small")
 
 splade_embed_model = model.sparse.SpladeEmbeddingFunction(
     model_name="naver/splade-cocondenser-ensembledistil",
@@ -67,15 +68,15 @@ parser = LlamaParse(
     language="en",
 )
 
-relik = RelikPathExtractor(
-    model="relik-ie/relik-relation-extraction-small"
-)
-
 coref_nlp = spacy.load('en_core_web_lg')
 coref_nlp.add_pipe('coreferee')
 
 # instantiate node parser
 node_parser = MarkdownElementNodeParser(llm=llama_llm, num_workers=8)
+
+relik = RelikPathExtractor(
+    model="relik-ie/relik-relation-extraction-small"
+)
 
 # Change name as needed
 COLLECTION_NAME = "vector_index"

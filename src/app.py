@@ -27,42 +27,6 @@ def delete_vector(request: DeleteIndexRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-
-@upload_vector_router.post("/upload-vector")
-def upload_vector(request: CreateIndexRequest):
-    file_location = request.file_location
-    data_folder = request.data_folder
-    try:
-        print("Parsing and Processing Documents...")
-        final_docs = parse_and_process_docs(file_location=file_location, data_folder=data_folder)
-        print(f"Final Docs Retrieved!")
-        print("Starting Ingestion Process!")
-        batch_ingestion(collection=collection, final_docs=final_docs)
-        print("Ingestion Process Completed!")
-        print("Creating Indexes for Vector DB...")
-        create_all_indexes(collection=collection)
-        return {
-            "message": "Documents have been successfully ingested, indexed, and loaded."
-        }
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-    
-@upload_graph_router.post("/upload-graph")
-def upload_graph(request: CreateIndexRequest):
-    file_location = request.file_location
-    data_folder = request.data_folder
-    try:
-        print("Parsing and Processing Documents...")
-        final_docs = parse_and_process_docs(file_location=file_location, data_folder=data_folder)
-        print(f"Final Docs Retrieved!")
-        print("Starting Ingestion Process!")
-        index = build_graph(documents=final_docs)
-        print("Ingestion Process Completed!")
-        return {
-            "message": "Documents have been successfully ingested, indexed, and loaded."
-        }
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     
 # Function to handle ingestion to Vector DB
 def ingest_vector_db(final_docs):
@@ -78,6 +42,37 @@ def ingest_kg_db(final_docs):
     print("Starting Ingestion Process for KG DB...")
     build_graph(documents=final_docs)
     print("KG DB Ingestion Process Completed!")
+
+@upload_vector_router.post("/upload-vector")
+def upload_vector(request: CreateIndexRequest):
+    file_location = request.file_location
+    data_folder = request.data_folder
+    try:
+        print("Parsing and Processing Documents...")
+        final_docs = parse_and_process_docs(file_location=file_location, data_folder=data_folder)
+        print(f"Final Docs Retrieved!")
+        ingest_vector_db(final_docs)
+        return {
+            "message": "Documents have been successfully ingested, indexed, and loaded."
+        }
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+    
+@upload_graph_router.post("/upload-graph")
+def upload_graph(request: CreateIndexRequest):
+    file_location = request.file_location
+    data_folder = request.data_folder
+    try:
+        print("Parsing and Processing Documents...")
+        final_docs = parse_and_process_docs(file_location=file_location, data_folder=data_folder)
+        print(f"Final Docs Retrieved!")
+        
+        ingest_kg_db(final_docs)
+        return {
+            "message": "Documents have been successfully ingested, indexed, and loaded."
+        }
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     
 @upload_all_router.post("/upload-all")
 def upload_all(request: CreateIndexRequest):

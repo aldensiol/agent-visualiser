@@ -25,7 +25,7 @@ This chatbot serves as both a personal learning tool and an educational platform
 ### Prerequisites
 
 - **Python**: Make sure you have Python 3.10 or higher installed.
-- **Streamlit**: `pip install streamlit`
+- **Chainlit**: `pip install chainlit`
 - **LangGraph**: `pip install langgraph`
 - **LangChain**: `pip install langchain`
 - **AWS SDK for Python (Boto3)**: `pip install boto3`
@@ -36,8 +36,8 @@ This chatbot serves as both a personal learning tool and an educational platform
 
 1. **Clone the Repository**
     ```bash
-    git clone https://github.com/your-username/streamlit-rag-chatbot.git
-    cd streamlit-rag-chatbot
+    git clone https://github.com/aldensiol/agent-visualiser
+    cd agent-visualiser
 
 2. **Install Required Packages**
     ```
@@ -45,7 +45,7 @@ This chatbot serves as both a personal learning tool and an educational platform
 
 3. **Run the Streamlit App**
     ```
-    streamlit run streamlit_app.py
+    chainlit run app.py -w
 
 ## 🌐 Project Structure
     STREAMLIT-AGENT/
@@ -100,4 +100,4 @@ This chatbot serves as both a personal learning tool and an educational platform
     ├── .gitignore                           
     ├── README.md                            # Project documentation and overview
     ├── requirements.txt                     # Python dependencies required for the project
-    └── streamlit_app.py                     # Main entry point for the Streamlit application
+    └── app.py                               # Main entry point for the Chainlit application
