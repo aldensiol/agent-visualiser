@@ -1,15 +1,10 @@
-import sys
-import os
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from fastapi import APIRouter, HTTPException, status
-from src.graph.build_graph import build_graph
-from src.schema.data import CreateIndexRequest, DeleteIndexRequest
-from src.services.services import collection
-from src.utils.utils import parse_and_process_docs
-from src.vector.create_index import batch_ingestion, drop_indexes, create_all_indexes
+from graph.build_graph import build_graph
+from schema.data import CreateIndexRequest, DeleteIndexRequest
+from services.services import collection, llama_llm, llama_openai_embed_model, graph_store
+from utils.utils import parse_and_process_docs
+from vector.create_index import batch_ingestion, drop_indexes, create_all_indexes
 
 delete_vector_router = APIRouter()
 upload_vector_router = APIRouter()
@@ -40,7 +35,7 @@ def ingest_vector_db(final_docs):
 # Function to handle ingestion to KG DB
 def ingest_kg_db(final_docs):
     print("Starting Ingestion Process for KG DB...")
-    build_graph(documents=final_docs)
+    build_graph(documents=final_docs, llm=llama_llm, embed_model=llama_openai_embed_model, graph_store=graph_store)
     print("KG DB Ingestion Process Completed!")
 
 @upload_vector_router.post("/upload-vector")

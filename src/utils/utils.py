@@ -4,7 +4,7 @@ import re
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from llama_index.core import Document
-from src.services.services import parser, node_parser, coref_nlp
+from services.services import parser, node_parser, coref_nlp
 from typing import List, Tuple, Optional
 
 def coref_text(text):
