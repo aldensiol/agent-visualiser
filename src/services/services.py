@@ -63,8 +63,10 @@ splade_embed_model = model.sparse.SpladeEmbeddingFunction(
 # instantiate doc parser
 parser = LlamaParse(
     result_type="markdown",
-    num_workers=8,
-    verbose = True,
+    num_workers=4,
+    verbose = False,
+    show_progress=True,
+    ignore_errors=True,
     language="en",
 )
 
