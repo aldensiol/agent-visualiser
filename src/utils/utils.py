@@ -7,6 +7,8 @@ from llama_index.core import Document
 from services.services import parser, node_parser, coref_nlp
 from typing import List, Tuple, Optional
 
+LONG_CHUNK_SIZE = 2000
+
 def coref_text(text):
     coref_doc = coref_nlp(text.strip())
     resolved_text = ""
@@ -132,7 +134,7 @@ def further_split_long_docs(doc_list: List[Document]) -> Tuple[List[Document], L
     for doc in doc_list:
         is_table = doc.metadata["is_table"]
         if not is_table:
-            if len(doc.text) > 1500:
+            if len(doc.text) > LONG_CHUNK_SIZE:
                 long_docs.append(doc)
             else:
                 short_docs.append(doc)
@@ -155,8 +157,8 @@ def chunk_doc(doc: Document, text_splitter: RecursiveCharacterTextSplitter) -> L
     
 def recursive_chunk_documents(long_docs: List[Document],
                               short_docs: List[Document], 
-                              chunk_size: int = 512, 
-                              chunk_overlap: int = 64,
+                              chunk_size: int = 1024, 
+                              chunk_overlap: int = 128,
                               separators: List[str] = ["\n\n", "\n", " ", ""]) -> List[Document]:
     
     text_splitter = RecursiveCharacterTextSplitter(

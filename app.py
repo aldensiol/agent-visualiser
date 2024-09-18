@@ -1,6 +1,6 @@
 import chainlit as cl
 
-from src.chatbot.agents import AgentGraph
+# from src.chatbot.agents import AgentGraph
 
 @cl.set_starters
 async def set_starters():
@@ -13,19 +13,19 @@ async def set_starters():
         cl.Starter(
             label="GraphRag over VectorRag",
             message="In what scenarios is GraphRag better than VectorRag?",
-            icon="src/icons/exercise.svg",
+            icon="src/icons/nodes.svg",
             ),
         cl.Starter(
             label="Exercises for diabetics",
             message="Please suggest some appropriate exercises for diabetics with heart conditions.",
-            icon="src/icons/nodes.svg",
+            icon="src/icons/exercise.svg",
             )
         ]
     
-@cl.on_chat_start
-async def on_chat_start():
-    # Set Agent Chain Here
-    cl.user_session.set("graph", AgentGraph)
+# @cl.on_chat_start
+# async def on_chat_start():
+#     # Set Agent Chain Here
+#     cl.user_session.set("graph", AgentGraph)
 
 @cl.on_message
 async def on_message(message: cl.Message):
