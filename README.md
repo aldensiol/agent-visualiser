@@ -1,10 +1,12 @@
-# Streamlit-Agent-Visualiser: A Visual Learning Tool for Agentic Workflows
+# Agent-Visualiser: A Visual Learning Tool for Agentic Workflows
 
-Welcome to the **Streamlit-Agent-Visualiser**! This project is designed as a visual and interactive tool to learn and explore the fascinating world of Retrieval-Augmented Generation (RAG) systems and Agentic workflows.
+Welcome to the **Chainlit-Agent-Visualiser**! This project is designed as a visual and interactive tool to learn and explore the fascinating world of Retrieval-Augmented Generation (RAG) systems and Agentic workflows.
 
 ## 🌟 Project Overview
 
-This chatbot serves as both a personal learning tool and an educational platform to ease the introduction to others about **Agentic workflows** and **RAG systems**. It is built using **Streamlit** to provide an intuitive interface with cool visualisations that illustrate how agents think, reason, and make decisions in real time.
+This chatbot serves as both a personal learning tool and an educational platform to ease the introduction to others about **Agentic workflows** and **RAG systems**. It is built using **Chainlit** to provide an intuitive interface with cool visualisations that illustrate how agents think, reason, and make decisions in real time.
+
+![Alt text](/images/Iterative_Workflow.drawio.png "Iterative Workflow")
 
 ### Key Features
 
