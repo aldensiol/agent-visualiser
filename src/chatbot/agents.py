@@ -3,7 +3,7 @@ from langchain_core.tools import StructuredTool
 from typing_extensions import override
 
 from src.chatbot.tools import DBRetrievalTool, KGRetrievalTool, WebSearchTool, AnswerGenerationTool, GradeAnswerTool, RefineAnswerTool
-from src.chatbot.workflow import GraphState
+from src.chatbot.state import GraphState
 
 class BaseAgent:
     def __init__(self, 
@@ -13,16 +13,16 @@ class BaseAgent:
         self.tool = tool
     
 class BaseRetrievalAgent(BaseAgent):
-    def __init__(self):
-        super().__init__(name="Base Retrieval Agent", tool=None)
-        
+    def __init__(self, name: str = "Base Retrieval Agent", tool: StructuredTool = None):
+        super().__init__(name=name, tool=tool)
+    
     @abstractmethod
     async def retrieve(self, query: str):
         pass
     
 class BaseGenerationAgent(BaseAgent):
-    def __init__(self):
-        super().__init__(name="Base Generation Agent", tool=None)
+    def __init__(self, name: str = "Base Generation Agent", tool: StructuredTool = None):
+        super().__init__(name=name, tool=tool)
         
     @abstractmethod
     async def generate(self, query: str):
@@ -30,8 +30,7 @@ class BaseGenerationAgent(BaseAgent):
     
 class VectorDBRetrievalAgent(BaseRetrievalAgent):
     def __init__(self):
-        super().__init__(name="Vector DB Retrieval Agent",
-                         tool=DBRetrievalTool())
+        super().__init__(name="Vector DB Retrieval Agent", tool=DBRetrievalTool())
     
     @override
     async def retrieve(self, state: GraphState) -> GraphState:

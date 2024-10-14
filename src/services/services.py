@@ -55,6 +55,7 @@ graph_store = Neo4jPropertyGraphStore(
     refresh_schema=False,
 )
 
+print("Loading in Graph Indexes and Retrievers...")
 index = PropertyGraphIndex.from_existing(
     llm = llama_llm,
     embed_model=llama_openai_embed_model,

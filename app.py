@@ -1,6 +1,6 @@
 import chainlit as cl
 
-# from src.chatbot.agents import AgentGraph
+from src.chatbot.workflow import graph
 
 @cl.set_starters
 async def set_starters():

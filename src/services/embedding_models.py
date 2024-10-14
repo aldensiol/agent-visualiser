@@ -4,6 +4,8 @@ from pymilvus import model
 
 print("Loading in Embedding Models...")
 bge_embed_model = TextEmbedding(model_name="BAAI/bge-large-en-v1.5")
+print("Finished loading BGE Embedding Model")
+
 llama_openai_embed_model = OpenAIEmbedding(model_name="text-embedding-3-small")
 splade_embed_model = model.sparse.SpladeEmbeddingFunction(
     model_name="naver/splade-cocondenser-ensembledistil",
