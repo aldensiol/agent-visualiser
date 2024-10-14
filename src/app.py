@@ -2,9 +2,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from fastapi import APIRouter, HTTPException, status
 from graph.build_graph import build_graph
 from schema.data import CreateIndexRequest, DeleteIndexRequest
-from services.services import collection, llama_llm, llama_openai_embed_model, graph_store
+from services.services import collection, llama_llm, graph_store
 from utils.utils import parse_and_process_docs
 from vector.create_index import batch_ingestion, drop_indexes, create_all_indexes
+
+llama_openai_embed_model = None
 
 delete_vector_router = APIRouter()
 upload_vector_router = APIRouter()

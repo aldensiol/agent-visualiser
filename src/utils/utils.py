@@ -4,7 +4,7 @@ import re
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from llama_index.core import Document
-from services.services import parser, node_parser, coref_nlp
+from services.models_and_parsers import parser, node_parser, coref_nlp
 from typing import List, Tuple, Optional
 
 LONG_CHUNK_SIZE = 2000
@@ -48,7 +48,7 @@ def convert_nodes_to_documents(text_nodes, object_nodes, source):
     """
     documents = []
     for node in text_nodes:
-        text = coref_text(node.text)
+        text = coref_text(node.text).lower()
         doc = Document(
             text= text,
             metadata = {
@@ -59,7 +59,7 @@ def convert_nodes_to_documents(text_nodes, object_nodes, source):
         documents.append(doc)
         
     for node in object_nodes:
-        text = coref_text(node.text)
+        text = coref_text(node.text).lower()
         doc = Document(
             text= text,
             metadata = {
