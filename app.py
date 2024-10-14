@@ -1,5 +1,6 @@
 import chainlit as cl
 
+from src.chatbot.input import BASE_INPUTS
 from src.chatbot.workflow import graph
 
 @cl.set_starters
@@ -22,16 +23,19 @@ async def set_starters():
             )
         ]
     
-# @cl.on_chat_start
-# async def on_chat_start():
-#     # Set Agent Chain Here
-#     cl.user_session.set("graph", AgentGraph)
+@cl.on_chat_start
+async def on_chat_start():
+    cl.user_session.set("graph", graph)
 
 @cl.on_message
 async def on_message(message: cl.Message):
-    chain = cl.user_session.get("graph")
-    res = await chain.ainvoke(
-        question=message.content, callbacks=[cl.LangchainCallbackHandler()]
-    )
-
-    await cl.Message(content=res).send()
+    graph = cl.user_session.get("graph")
+    
+    # Create an initial state
+    inputs = BASE_INPUTS.copy()
+    inputs["query"] = str(message.content)
+    
+    results = await graph.ainvoke(inputs)
+    response = results.get("answer", "")
+    
+    await cl.Message(content=response).send()

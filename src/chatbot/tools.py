@@ -138,7 +138,7 @@ class DBRetrievalTool(BaseRetrievalTool):
     
     @override
     def get_tool(self) -> StructuredTool:
-        return StructuredTool(
+        return StructuredTool.from_function(
             func=self.retrieve_db, 
             coroutine=self.retrieve_db_async,
             name=self.name,
@@ -150,7 +150,7 @@ class KGRetrievalTool(BaseRetrievalTool):
         super().__init__(name="Retrieve from Knowledge Graph", 
                          description="Retrieves context from a Knowledge Graph, given a query.")
         
-    def retrieve_kg(query: str) -> str:
+    def retrieve_kg(self, query: str) -> str:
         """
         Retrieves context from the ingested knowledge graph, given a list of queries.
         Processes queries in parallel using ThreadPoolExecutor.
@@ -166,7 +166,7 @@ class KGRetrievalTool(BaseRetrievalTool):
         context = '\n\n'.join([node.text for node in nodes])
         return context
 
-    async def retrieve_kg_async(query: str) -> str:
+    async def retrieve_kg_async(self, query: str) -> str:
         """
         Retrieves context from the ingested knowledge graph, given a list of queries.
         Processes queries in parallel using ThreadPoolExecutor.
@@ -184,7 +184,7 @@ class KGRetrievalTool(BaseRetrievalTool):
     
     @override
     def get_tool(self) -> StructuredTool:
-        return StructuredTool(
+        return StructuredTool.from_function(
             func=self.retrieve_kg, 
             coroutine=self.retrieve_kg_async,
             name=self.name,
@@ -196,7 +196,7 @@ class WebSearchTool(BaseRetrievalTool):
         super().__init__(name="Retrieve from Web Search", 
                          description="Retrieves context from a Web Search, given a query.")
         
-    async def websearch(query: str, num_results: int = 3) -> str:
+    async def websearch(self, query: str, num_results: int = 3) -> str:
         """
         Retrieves context from the web using SerpAPI for search and AsyncWebCrawler for content
 
@@ -268,7 +268,7 @@ class AnswerGenerationTool(BaseGenerationTool):
     
     @override
     def get_tool(self) -> StructuredTool:
-        return StructuredTool(
+        return StructuredTool.from_function(
             func=self.generate_answer, 
             coroutine=self.generate_answer,
             name=self.name,
@@ -318,7 +318,7 @@ class GradeAnswerTool(BaseGenerationTool):
     
     @override
     def get_tool(self) -> StructuredTool:
-        return StructuredTool(
+        return StructuredTool.from_function(
             func=self.grade_answer, 
             coroutine=self.grade_answer_async,
             name=self.name,
@@ -354,7 +354,7 @@ class RefineAnswerTool(BaseGenerationTool):
     
     @override
     def get_tool(self) -> StructuredTool:
-        return StructuredTool(
+        return StructuredTool.from_function(
             func=self.refine_answer, 
             coroutine=self.refine_answer,
             name=self.name,

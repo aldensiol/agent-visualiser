@@ -30,7 +30,8 @@ class BaseGenerationAgent(BaseAgent):
     
 class VectorDBRetrievalAgent(BaseRetrievalAgent):
     def __init__(self):
-        super().__init__(name="Vector DB Retrieval Agent", tool=DBRetrievalTool())
+        super().__init__(name="Vector DB Retrieval Agent", 
+                         tool=DBRetrievalTool().get_tool())
     
     @override
     async def retrieve(self, state: GraphState) -> GraphState:
@@ -50,7 +51,7 @@ class VectorDBRetrievalAgent(BaseRetrievalAgent):
 class KGDBRetrievalAgent(BaseRetrievalAgent):
     def __init__(self):
         super().__init__(name="KG DB Retrieval Agent",
-                         tool=KGRetrievalTool())
+                         tool=KGRetrievalTool().get_tool())
     
     @override
     async def retrieve(self, state: GraphState) -> GraphState:
@@ -71,7 +72,7 @@ class KGDBRetrievalAgent(BaseRetrievalAgent):
 class WebSearchAgent(BaseRetrievalAgent):
     def __init__(self):
         super().__init__(name="Web Search Agent",
-                         tool=WebSearchTool())
+                         tool=WebSearchTool().get_tool())
     
     @override
     async def retrieve(self, state: GraphState) -> GraphState:
@@ -92,7 +93,7 @@ class WebSearchAgent(BaseRetrievalAgent):
 class AnswerGenerationAgent(BaseGenerationAgent):
     def __init__(self):
         super().__init__(name="Answer Generation Agent",
-                         tool=AnswerGenerationTool())
+                         tool=AnswerGenerationTool().get_tool())
     
     @override
     async def generate(self, state: GraphState) -> GraphState:
@@ -118,7 +119,7 @@ class AnswerGenerationAgent(BaseGenerationAgent):
 class AnswerGradingAgent(BaseGenerationAgent):
     def __init__(self):
         super().__init__(name="Answer Grading Agent",
-                         tool=GradeAnswerTool())
+                         tool=GradeAnswerTool().get_tool())
     
     @override
     async def generate(self, state: GraphState) -> GraphState:
@@ -152,7 +153,7 @@ class AnswerGradingAgent(BaseGenerationAgent):
 class AnswerRefineAgent(BaseGenerationAgent):
     def __init__(self):
         super().__init__(name="Answer Refine Agent",
-                         tool=RefineAnswerTool())
+                         tool=RefineAnswerTool().get_tool())
     
     @override
     async def generate(self, state: GraphState) -> GraphState:
