@@ -1,11 +1,15 @@
 import os
 
 from langchain_anthropic import ChatAnthropic
+
+from llama_index.core import PropertyGraphIndex 
+from llama_index.core.indices.property_graph import VectorContextRetriever, LLMSynonymRetriever
 from llama_index.llms.anthropic import Anthropic
 from llama_index.graph_stores.neo4j import Neo4jPropertyGraphStore
 from pymilvus import (
     connections, Collection
 )
+from src.services.embedding_models import llama_openai_embed_model
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 CLAUDE_API_KEY = os.getenv('CLAUDE_API_KEY')
@@ -50,3 +54,23 @@ graph_store = Neo4jPropertyGraphStore(
     url=NEO4J_URL,
     refresh_schema=False,
 )
+
+index = PropertyGraphIndex.from_existing(
+    llm = llama_llm,
+    embed_model=llama_openai_embed_model,
+    property_graph_store=graph_store,
+)
+
+vector_retriever = VectorContextRetriever(
+  index.property_graph_store,
+  vector_store=index.vector_store,
+  embed_model=llama_openai_embed_model,
+)
+
+keyword_retriever = LLMSynonymRetriever(
+    index.property_graph_store, 
+    llm=llama_llm,
+    path_depth=1,
+)
+
+kg_retriever = index.as_retriever(sub_retrievers=[vector_retriever, keyword_retriever])

@@ -79,15 +79,15 @@ GRADE_ANSWER_PROMPT = """<system>
     """
 
 REFINE_ANSWER_PROMPT = """<system>
-    You are an expert answer refiner with access to both the initial answer and additional context from a Knowledge Graph (KG). Your task is to enhance the initial answer using the additional context provided while maintaining logical coherence, relevance, completeness, and correctness. Ensure that the refined answer is comprehensive, factually accurate, and directly addresses the query.
+    You are an expert answer refiner with access to both the initial answer and additional context from a Websearch. Your task is to enhance the initial answer using the additional context provided while maintaining logical coherence, relevance, completeness, and correctness. Ensure that the refined answer is comprehensive, factually accurate, and directly addresses the query.
     </system>
 
     <instructions>
     - Review the initial answer provided in response to the query. Identify areas where the answer could be more detailed, accurate, or relevant.
-    - Incorporate relevant information from the KG context to improve the answer. Ensure that the added information directly supports or expands upon the initial answer without deviating from the main topic of the query.
+    - Incorporate relevant information from the Websearch context to improve the answer. Ensure that the added information directly supports or expands upon the initial answer without deviating from the main topic of the query.
     - Maintain a clear and logical flow in the refined answer. Avoid redundancy and ensure that the enhanced content is seamlessly integrated with the existing text.
     - The refined answer should be concise yet comprehensive, covering all aspects of the query as fully as possible with the available context.
-    - Ensure that all statements in the refined answer are factually accurate and derived from either the initial answer or the KG context. Avoid introducing unsupported or speculative information.
+    - Ensure that all statements in the refined answer are factually accurate and derived from either the initial answer or the Websearch context. Avoid introducing unsupported or speculative information.
     - Do not include any preamble or additional commentary. Return only the refined answer text in a natural and fluent style.
     </instructions>
 
@@ -100,7 +100,7 @@ REFINE_ANSWER_PROMPT = """<system>
     </initial_answer>
 
     <context>
-    {kg_context}
+    {websearch_context}
     </context>
 
     <refined_answer>
