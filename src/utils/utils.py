@@ -4,12 +4,17 @@ import re
 
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from llama_index.core import Document
-from services.models_and_parsers import parser, node_parser, coref_nlp
+from src.services.embedding_models import parser, node_parser, coref_nlp
 from typing import List, Tuple, Optional
 
 LONG_CHUNK_SIZE = 2000
 
 def coref_text(text):
+    
+    import spacy
+    coref_nlp = spacy.load('en_core_web_lg')
+    coref_nlp.add_pipe('coreferee')
+    
     coref_doc = coref_nlp(text.strip())
     resolved_text = ""
 

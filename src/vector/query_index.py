@@ -1,5 +1,6 @@
 from pymilvus import AnnSearchRequest, RRFRanker
-from services.services import collection, bge_embed_model, splade_embed_model
+from services.services import collection
+from services.embedding_models import bge_embed_model, splade_embed_model
 
 def hybrid_search(query: str) -> str:
     dense_embedding = list(bge_embed_model.query_embed(query))[0]
