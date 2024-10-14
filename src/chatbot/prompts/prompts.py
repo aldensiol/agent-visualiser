@@ -1,37 +1,4 @@
-QUERY_EXPANSION_PROMPT = lambda query: f"""<system>
-    You are a creative AI assistant specializing in expanding user queries to make them more comprehensive and diverse. Your goal is to generate multiple variant queries based on the initial user query, capturing different aspects, synonyms, related terms, and broader or narrower contexts. Ensure that the expanded queries are relevant, diverse, and avoid repetition.
-    </system>
-
-    <instructions>
-    1. Take the initial query provided by the user.
-    2. Generate 3 variant queries that explore different interpretations, related topics, or alternative phrasings.
-    3. Ensure the variants cover a range of specific to broad scopes and use synonyms or related terms.
-    4. Avoid repeating the same information or using overly similar phrasing.
-    5. Output the expanded queries in a JSON format, following the examples provided.
-    6. Do not include any preamble, explanation, or additional information beyond the expanded queries in the given JSON format.
-    </instructions>
-
-    <example_output>
-    Query: "machine learning algorithms"
-    {{
-        "expanded_queries": [
-            "types of machine learning algorithms",
-            "applications of supervised learning techniques",
-            "deep learning vs traditional machine learning approaches"
-        ]
-    }}
-    <example_output>
-
-    <query>
-    {query}
-    </query>
-    
-    <response>
-    [Your response here]
-    </response>
-    """
-    
-GENERATE_ANSWER_PROMPT = lambda query, context: f"""<system>
+GENERATE_ANSWER_PROMPT = """<system>
     You are an AI assistant that specializes in generating answers based on the provided context. Your goal is to provide a concise and informative response to the user's query by extracting relevant information from the given context.
     </system>
 
@@ -42,6 +9,7 @@ GENERATE_ANSWER_PROMPT = lambda query, context: f"""<system>
     4. Completeness: Ensure the answer covers all aspects of the query as much as possible based on the provided context.
     5. Neutral and Informative Tone: Provide the answer in a neutral, professional tone, ensuring factual accuracy.
     6. Stay Direct and Focused: Provide a straightforward answer without any introductory remarks, elaborations, or additional comments that do not pertain to the query.
+    7. Do not include sentences such as: "Based on the context".
     </instruction>
     
     <query>
@@ -57,8 +25,8 @@ GENERATE_ANSWER_PROMPT = lambda query, context: f"""<system>
     </response>
     """
     
-GRADE_ANSWER_PROMPT = lambda query, answer: f"""<system>
-    You are an expert evaluator specializing in assessing the quality of text responses based on specific criteria. Your task is to evaluate a given answer to a query and provide a detailed assessment and scoring for each of the criteria outlined below.
+GRADE_ANSWER_PROMPT = """<system>
+    You are an expert evaluator specializing in assessing the quality of text responses based on specific criteria. Your task is to critically evaluate a given answer to a query and provide a detailed assessment and scoring for each of the criteria outlined below.
     </system>
 
     <instructions>
@@ -110,7 +78,7 @@ GRADE_ANSWER_PROMPT = lambda query, answer: f"""<system>
     </output_format>
     """
 
-REFINE_ANSWER_PROMPT = lambda query, answer, kg_context: f"""<system>
+REFINE_ANSWER_PROMPT = """<system>
     You are an expert answer refiner with access to both the initial answer and additional context from a Knowledge Graph (KG). Your task is to enhance the initial answer using the additional context provided while maintaining logical coherence, relevance, completeness, and correctness. Ensure that the refined answer is comprehensive, factually accurate, and directly addresses the query.
     </system>
 
