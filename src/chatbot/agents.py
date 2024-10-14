@@ -174,3 +174,22 @@ class AnswerRefineAgent(BaseGenerationAgent):
         websearch_context = state["websearch_context"]
         refined_answer = await self.tool.invoke({"query": query, "answer": answer, "websearch_context": websearch_context})
         return {"answer": refined_answer}
+    
+def decide_metrics_agent(state: GraphState) -> GraphState:
+    """
+    Checks the metrics of the answer generated and decides if they are good enough
+
+    Args:
+        state (GraphState): The state of the graph
+
+    Returns:
+        GraphState: The updated state of the graph
+    """
+    
+    print("------- Deciding If Requires Extra Context from KG -------")
+    metric_list = [state["metrics"]["relevance"], state["metrics"]["completeness"], state["metrics"]["coherence"], state["metrics"]["correctness"]]
+    print(f"Metrics: {metric_list}")
+    for metric in metric_list:
+        if metric <= 7:
+            "not good enough"
+    return "good"

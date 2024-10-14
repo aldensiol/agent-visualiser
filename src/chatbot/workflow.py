@@ -1,4 +1,7 @@
+from langgraph.graph import START, END, StateGraph
 from typing import List, DefaultDict, TypedDict
+
+from src.chatbot.agents import VectorDBRetrievalAgent, KGDBRetrievalAgent, WebSearchAgent, AnswerGenerationAgent, AnswerGradingAgent, AnswerRefineAgent, decide_metrics_agent
 
 class GraphState(TypedDict):
     """
@@ -26,3 +29,48 @@ class GraphState(TypedDict):
     metrics: DefaultDict[str, str]
     reasons: DefaultDict[str, str]
     answer: str
+    
+# retrieval agents
+retrieve_db_agent = VectorDBRetrievalAgent()
+retrieve_kg_agent = KGDBRetrievalAgent()
+websearch_agent = WebSearchAgent()
+
+# generation agents
+generate_answer_agent = AnswerGenerationAgent()
+grader_agent = AnswerGradingAgent()
+refine_answer_agent = AnswerRefineAgent()
+    
+def get_graph():
+    builder = StateGraph(GraphState)
+
+    builder.add_node("search_kg_db", retrieve_kg_agent)
+    builder.add_node("search_vector_db", retrieve_db_agent)
+    builder.add_node("generate_answer", generate_answer_agent)
+    builder.add_node("grader", grader_agent)
+    builder.add_node("websearch", websearch_agent)
+    builder.add_node("refine_answer", refine_answer_agent)
+    
+    builder.add_edge(START, "search_vector_db")
+    builder.add_edge(START, "search_kg_db")
+
+    builder.add_edge(["search_kg_db", "search_vector_db"], "generate_answer")
+    builder.add_edge("generate_answer", "grader")
+
+    builder.add_conditional_edges(
+        "grader",
+        decide_metrics_agent,
+        {
+            "good": END,
+            "not good enough": "websearch"
+        }
+    )
+    
+    builder.add_edge("websearch", "refine_answer")
+
+    builder.add_edge("refine_answer", "grader")
+
+    graph = builder.compile()
+    
+    return graph
+
+graph = get_graph()
