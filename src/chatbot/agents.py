@@ -135,7 +135,7 @@ class AnswerGradingAgent(BaseGenerationAgent):
         print("------- Grading Answer -------")
         query = state["query"]
         answer = state["answer"]
-        result = self.tool.invoke({"query": query, "answer": answer})
+        result = await self.tool.ainvoke({"query": query, "answer": answer})
         evaluation, reasoning = result['evaluation'], result['reasoning']
         
         relevance, completeness, coherence, correctness = evaluation["relevance"], evaluation["completeness"], evaluation["coherence"], evaluation["correctness"]

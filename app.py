@@ -1,5 +1,7 @@
 import chainlit as cl
 
+from langchain_core.messages import AIMessageChunk
+
 from src.chatbot.input import BASE_INPUTS
 from src.chatbot.workflow import graph
 
@@ -29,13 +31,33 @@ async def on_chat_start():
 
 @cl.on_message
 async def on_message(message: cl.Message):
+    
     graph = cl.user_session.get("graph")
     
     # Create an initial state
     inputs = BASE_INPUTS.copy()
     inputs["query"] = str(message.content)
     
-    results = await graph.ainvoke(inputs)
-    response = results.get("answer", "")
+    first = True
+    final_answer = ""
     
-    await cl.Message(content=response).send()
+    # Create a Chainlit message that we'll update
+    chainlit_message = cl.Message(content="")
+    await chainlit_message.send()
+    
+    # Stream the results
+    async for msg, metadata in graph.astream(inputs, stream_mode="messages"):
+        
+        print(f"METADATA: {metadata}")
+        print("=====" * 20)
+        
+        if isinstance(msg, AIMessageChunk):
+            if first:
+                chainlit_message.content += "Initial Answer: \n\n"
+                first = False
+            
+            chainlit_message.content += msg.content if metadata.get('langgraph_node') != 'grader' else ""
+            final_answer += msg.content if metadata.get('langgraph_node') != 'grader' else ""
+            await chainlit_message.update()
+
+    await cl.Message(content=f"Final Chosen Answer: \n\n{final_answer}").send()
