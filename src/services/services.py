@@ -1,4 +1,3 @@
-import nest_asyncio
 import os
 import spacy
 
@@ -12,8 +11,6 @@ from llama_parse import LlamaParse
 from pymilvus import (
     model, connections, Collection
 )
-
-nest_asyncio.apply()
 
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 CLAUDE_API_KEY = os.getenv('CLAUDE_API_KEY')
