@@ -18,8 +18,8 @@ async def set_starters():
             icon="https://www.svgrepo.com/show/427306/fitness-workout-healthy.svg",
             ),
         cl.Starter(
-            label="Diabetes Management Plan",
-            message="Can you provide a comprehensive weekly plan for a newly diagnosed type 2 diabetic who is also overweight, has high blood pressure, and a family history of kidney disease? Include dietary recommendations, exercise routines, blood sugar monitoring schedule, potential medications, and lifestyle changes. Also, explain how this plan might need to be adjusted as the patient ages or if complications arise.",
+            label="Complex Diet & Exercise Plan",
+            message="Design a 4-week exercise plan for a newly diagnosed type 2 diabetic who is overweight and has mild hypertension. Include a progressive exercise routine, balanced diet, blood sugar monitoring schedule, stress management techniques, and lifestyle modifications. Explain how each element helps manage diabetes, promotes weight loss, and improves heart health.",
             icon="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtc4e90qSf97_dpcWCXKHDGI4wuUnmLnnmWg&s",
             )
         ]
@@ -34,13 +34,14 @@ async def on_message(message: cl.Message):
     inputs = BASE_INPUTS.copy()
     inputs["query"] = str(message.content)
     
-    first_answer, first_grade = [True], [True]
+    first_answer, first_grade, first_refine = [True], [True], [True]
     final_answer = [""]
     answer_message = cl.Message(content="")
+    refine_message = cl.Message(content="")
     
     async for msg_type, update in graph.astream(inputs, stream_mode=["messages", "updates"]):
         if msg_type == "messages":
-            await handle_messages(update, answer_message, first_answer, first_grade, final_answer)
+            await handle_messages(update, answer_message, refine_message, first_answer, first_grade, first_refine, final_answer)
         elif msg_type == "updates":
             await handle_updates(update, final_answer)
     

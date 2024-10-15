@@ -1,6 +1,6 @@
 # Agent-Visualiser: A Visual Learning Tool for Agentic Workflows
 
-Welcome to the **Chainlit-Agent-Visualiser**! This project is designed as a visual and interactive tool to learn and explore the fascinating world of Retrieval-Augmented Generation (RAG) systems and Agentic workflows.
+Welcome to the **Agent-Visualiser**! This project is designed as a visual and interactive tool to learn and explore the fascinating world of Retrieval-Augmented Generation (RAG) systems and Agentic workflows.
 
 ## 🌟 Project Overview
 

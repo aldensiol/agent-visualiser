@@ -227,7 +227,7 @@ class WebSearchTool(BaseRetrievalTool):
             
             # Extract relevant information from the crawled content
             content = result.markdown[:3000]  # Limit to first 1000 characters
-            contents.append(f"URL: {url}\n\nContent:\n{content}\n\n")
+            contents.append(f"URL: {url}\nContent:\n{content}\n\n")
 
         return "\n".join(contents)
     

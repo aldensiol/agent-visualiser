@@ -25,23 +25,41 @@ def get_source_elements(content:str, display: str = "inline"):
     ]
     return source_elements
 
-async def handle_messages(update, answer_message, first_answer, first_grade, final_answer):
+async def handle_messages(update, answer_message, refine_message, first_answer, first_grade, first_refine, final_answer):
     chunk, metadata = update
-    
+    node = metadata.get('langgraph_node')
+
+    if node == 'generate_answer':
+        await handle_answer(chunk, answer_message, first_answer, final_answer)
+    elif node == 'grader':
+        await handle_grader(first_grade)
+    elif node == 'refine_answer':
+        await handle_refine(chunk, refine_message, first_refine, final_answer)
+
+async def handle_answer(chunk, answer_message, first_answer, final_answer):
     if first_answer[0]:
         await send_answer_header()
         await answer_message.send()
         first_answer[0] = False
-        return
-    
-    if metadata.get('langgraph_node') != 'grader':
+    else:
         answer_message.content += chunk.content
         await answer_message.update()
         final_answer[0] += chunk.content
-        
-    elif first_grade[0]:
+
+async def handle_grader(first_grade):
+    if first_grade[0]:
         await send_grader_header()
         first_grade[0] = False
+
+async def handle_refine(chunk, refine_message, first_refine, final_answer):
+    if first_refine[0]:
+        await send_refine_header()
+        await refine_message.send()
+        first_refine[0] = False
+    else:
+        refine_message.content += chunk.content
+        await refine_message.update()
+        final_answer[0] += chunk.content
 
 async def handle_updates(update, final_answer):
     print(f"Update: {update}")
@@ -98,24 +116,29 @@ async def send_agent_message(agent_type: str, retrieved_context: Optional[str], 
         grading_decision = cl.Text(name="Decision", display="inline", content=decision)
         await cl.Message(content="", elements=[grading_decision]).send()
         
-    else:  # Vector DB Retriever Agent or KG DB Retriever Agent
+    else:  # Vector DB Retriever Agent or KG DB Retriever Agent or Websearch Agent
         if retrieved_context:
             context_element = get_context_element(name=agent_type, display="side", content=retrieved_context)
             await cl.Message(content=agent_type, elements=context_element).send()
             
             source_elements = get_source_elements(retrieved_context) if agent_type != "Websearch Agent" else []
-            for elem in source_elements:
-                await cl.Message(content=elem.name, elements=[elem]).send()
+            # for elem in source_elements:
+            #     await cl.Message(content=elem.name, elements=[elem]).send()
+            await cl.Message(content="PDF Source Material", elements=source_elements).send()
         else:
             await cl.Message(content=f"No context available for {agent_type}").send()
 
 async def send_answer_header():
-    answer_elements = [cl.Text(name="", display="inline", content="Answer Generation Agent's Answer")]
+    answer_elements = [cl.Text(name="Answer Generation Agent's Answer", display="inline", content=" ")]
     await cl.Message(content="", elements=answer_elements).send()
 
 async def send_grader_header():
-    grading_elements = [cl.Text(name="", display="inline", content="Grader Agent's Evaluation")]
-    await cl.Message(content="", elements=grading_elements).send()
+    grading_elements = [cl.Text(name="Grader Agent's Evaluation", display="inline", content=" ")]
+    await cl.Message(content="", elements=grading_elements).send() 
+    
+async def send_refine_header():
+    refine_elements = [cl.Text(name="Refine Answer Agent's Refined Answer", display="inline", content=" ")]
+    await cl.Message(content="", elements=refine_elements).send()
 
 def get_context_element(name: str, content: str, display: str = "side"):
     return [cl.Text(name=name, display=display, content=content)]
