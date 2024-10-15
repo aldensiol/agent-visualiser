@@ -74,4 +74,4 @@ keyword_retriever = LLMSynonymRetriever(
     path_depth=1,
 )
 
-kg_retriever = index.as_retriever(sub_retrievers=[vector_retriever, keyword_retriever])
+kg_retriever = index.as_retriever(sub_retrievers=[vector_retriever])

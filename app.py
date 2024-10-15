@@ -11,12 +11,12 @@ async def set_starters():
         cl.Starter(
             label="Medicines for Diabetes",
             message="What are some Medicines for Diabetes?",
-            icon="https://www.svgrepo.com/show/109551/pill.svg",
+            icon="https://upload.wikimedia.org/wikipedia/commons/thumb/4/44/740-pill.svg/1200px-740-pill.svg.png",
             ),
         cl.Starter(
             label="Exercises for diabetics",
             message="Please suggest some appropriate exercises for diabetics with heart conditions.",
-            icon="https://cdni.iconscout.com/illustration/premium/thumb/exercise-illustration-download-in-svg-png-gif-file-formats--dumbbells-fitness-exercises-with-biceps-workout-doing-artistry-pack-people-illustrations-5295079.png",
+            icon="https://www.svgrepo.com/show/427306/fitness-workout-healthy.svg",
             ),
         cl.Starter(
             label="Diabetes Management Plan",
@@ -43,21 +43,58 @@ async def on_message(message: cl.Message):
     
     # Create a Chainlit message that we'll update
     chainlit_message = cl.Message(content="")
-    await chainlit_message.send()
     
     # Stream the results
-    async for msg, metadata in graph.astream(inputs, stream_mode="messages"):
-        
-        print(f"METADATA: {metadata}")
-        print("=====" * 20)
-        
-        if isinstance(msg, AIMessageChunk):
+    async for message, update in graph.astream(inputs, stream_mode=["messages", "updates"]):
+        if message == "messages":
+            chunk = update[0]
+            metadata = update[1]
             if first:
-                chainlit_message.content += "Initial Answer: \n\n"
+                await chainlit_message.send()
+                chainlit_message.content += "Answer Generation Agent's Initial Answer: \n\n"
                 first = False
             
-            chainlit_message.content += msg.content if metadata.get('langgraph_node') != 'grader' else ""
-            final_answer += msg.content if metadata.get('langgraph_node') != 'grader' else ""
+            chainlit_message.content += chunk.content if metadata.get('langgraph_node') != 'grader' else ""
+            final_answer += chunk.content if metadata.get('langgraph_node') != 'grader' else ""
             await chainlit_message.update()
-
+        
+        elif message == "updates": 
+            # update is a dictionary here
+            retrieved_context = (
+                    update.get('search_vector_db', {}).get('db_context') or
+                    update.get('search_kg_db', {}).get('kg_context') or
+                    update.get('websearch', {}).get('websearch_context')
+            )
+            
+            if not retrieved_context:
+                continue
+            
+            vector_db = True if update.get('search_vector_db') else False
+            kg_db = True if update.get('search_kg_db') else False
+            websearch = True if update.get('websearch') else False
+            
+            if vector_db:
+                context_elements = [
+                    cl.Text(name="Vector DB Retriever Agent", display = "side", content=retrieved_context)
+                ]
+                await cl.Message(content="Vector DB Retriever Agent", elements=context_elements).send()
+            
+            elif kg_db:
+                context_elements = [
+                    cl.Text(name="KG DB Retriever Agent", display = "side", content=retrieved_context)
+                ]
+                await cl.Message(content="KG DB Retriever Agent", elements=context_elements).send()
+            
+            elif websearch:
+                context_elements = [
+                    cl.Text(name="Websearch Agent", display = "side", content=retrieved_context)
+                ]
+                await cl.Message(content="Websearch Agent", elements=context_elements).send()
+            
+            source_elements = [
+                cl.Pdf(name="Diabetes Treatment_ Insulin", display="inline", path="src/pdfs/Diabetes Treatment_ Insulin.pdf")
+            ]
+            
+            await cl.Message(content="Diabetes Treatment_ Insulin", elements=source_elements).send()
+            
     await cl.Message(content=f"Final Chosen Answer: \n\n{final_answer}").send()
