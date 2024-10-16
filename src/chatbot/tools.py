@@ -1,3 +1,4 @@
+import asyncio
 import os
 import re
 
@@ -200,33 +201,25 @@ class WebSearchTool(BaseRetrievalTool):
 
     def clean_content(self, content: str) -> str:
         """
-        Clean the lowercase content by removing boilerplate text, headers, and irrelevant information.
+        Clean the content by removing boilerplate text, headers, and irrelevant information.
         """
         # Remove HTML tags
         soup = BeautifulSoup(content, 'html.parser')
         
-        # Remove script and style elements
-        for script in soup(["script", "style"]):
-            script.decompose()
+        # Remove script, style, and nav elements
+        for element in soup(["script", "style", "nav", "footer", "header"]):
+            element.decompose()
         
-        text = soup.get_text()
+        # Extract text from remaining HTML
+        text = soup.get_text(separator=' ', strip=True)
 
-        # Remove headers and footers (common patterns)
-        text = re.sub(r'^.*?(?=\n\n)', '', text, flags=re.DOTALL)  # Remove top header
-        text = re.sub(r'\n\n.*?$', '', text, flags=re.DOTALL)  # Remove bottom footer
-
-        # Remove navigation-like patterns
-        text = re.sub(r'\n[^\n]+(?:\n[^\n]+){2,5}$', '', text)  # Remove bottom navigation-like text
-        text = re.sub(r'^\s*(?:[a-z]+(?:\s[a-z]+)*\s*\n){2,}', '', text)  # Remove top navigation-like text
-
-        # Remove image descriptions and URLs
-        text = re.sub(r'\[.*?\]', '', text)  # Remove text in square brackets (often image descriptions)
-        text = re.sub(r'https?://\S+', '', text)  # Remove URLs
+        # Remove URLs
+        text = re.sub(r'https?://\S+|www\.\S+', '', text)
 
         # Remove extra whitespace and newlines
         text = re.sub(r'\s+', ' ', text).strip()
 
-        # Remove common boilerplate phrases (adjusted for lowercase)
+        # Remove common boilerplate phrases (case-insensitive)
         boilerplate_patterns = [
             r'copyright ©.*',
             r'all rights reserved',
@@ -236,33 +229,21 @@ class WebSearchTool(BaseRetrievalTool):
             r'(log|sign) (in|out|up)',
             r'subscribe to our newsletter',
             r'follow us on social media',
-            r'back to top',
-            r'skip to (main content|navigation)',
-            r'search',
-            r'menu',
-            r'home',
-            r'about( us)?',
-            r'contact( us)?',
         ]
         for pattern in boilerplate_patterns:
-            text = re.sub(pattern, '', text)
+            text = re.sub(pattern, '', text, flags=re.IGNORECASE)
 
         # Remove common email patterns
         text = re.sub(r'\S+@\S+\.\S+', '', text)
 
-        # Remove patterns like "page 1 of 10"
+        # Remove patterns like "page X of Y"
         text = re.sub(r'page \d+ of \d+', '', text)
 
         # Remove patterns like "last updated: date"
         text = re.sub(r'last updated:?\s*\d{1,2}[-/]\d{1,2}[-/]\d{2,4}', '', text)
 
-        # Remove numeric references often used in academic papers
-        text = re.sub(r'\[\d+\]', '', text)
-
-        # Try to extract main content (if it starts with a header)
-        main_content = re.split(r'^#', text, maxsplit=1)
-        if len(main_content) > 1:
-            text = f"#{main_content[1]}"
+        # Remove very short lines (likely to be menu items, etc.)
+        text = '\n'.join(line for line in text.split('\n') if len(line.split()) > 3)
 
         # Final cleanup: remove any leading/trailing whitespace and multiple consecutive spaces
         text = re.sub(r'\s+', ' ', text).strip()
@@ -271,41 +252,47 @@ class WebSearchTool(BaseRetrievalTool):
 
         
     async def websearch(self, query: str, num_results: int = 3) -> str:
-        """
-        Retrieves context from the web using SerpAPI for search and AsyncWebCrawler for content
+       """
+       Retrieves context from the web using SerpAPI for search and AsyncWebCrawler for content
 
-        Args:
-            query (str): The user query
-            num_results (int): Number of top results to crawl (default: 3)
-            
-        Returns:
-            str: The formatted context retrieved from the websearch
-        """
-        print("------- Retrieving Context Via Web Search -------")
-        # Use SerpAPI to get search results
-        params = {
-            "q": query,
-            "num": num_results,
-            "api_key": os.getenv("SERPAPI_API_KEY")
-        }
-        search = GoogleSearch(params)
-        results = search.get_dict()
-        
-        # Extract URLs from search results
-        urls = [result['link'] for result in results.get('organic_results', [])[:num_results]]
-        
-        # Crawl each URL using AsyncWebCrawler
-        contents = []
-        for url in urls:
-            async with AsyncWebCrawler(verbose=True) as crawler:
-                result = await crawler.arun(url=url)
-            
-            # Extract relevant information from the crawled content
-            content = self.clean_content(result.markdown.lower())
-            content = content[:3000]
-            contents.append(f"URL: {url}\nContent:\n{content}\n\n")
+       Args:
+           query (str): The user query
+           num_results (int): Number of top results to crawl (default: 3)
+           
+       Returns:
+           str: The formatted context retrieved from the websearch
+       """
+       print("------- Retrieving Context Via Web Search -------")
+       # Use SerpAPI to get search results
+       params = {
+           "q": query,
+           "num": num_results,
+           "api_key": os.getenv("SERPAPI_API_KEY")
+       }
+       search = GoogleSearch(params)
+       results = search.get_dict()
+       
+       # Extract URLs from search results
+       urls = [result['link'] for result in results.get('organic_results', [])[:num_results]]
+       
+       # Crawl each URL using AsyncWebCrawler
+       contents = []
+       async with AsyncWebCrawler(verbose=True) as crawler:
+           tasks = [crawler.arun(url=url) for url in urls]
+           results = await asyncio.gather(*tasks)
+       
+       for url, result in zip(urls, results):
+           # Extract relevant information from the crawled content
+           content = self.clean_content(result.markdown)
+           
+           # Truncate content to ~1000 words
+           words = content.split()
+           if len(words) > 1000:
+               content = ' '.join(words[:1000]) + '...'
+           
+           contents.append(f"URL: {url}\nContent:\n{content}\n\n")
 
-        return "".join(contents)
+       return "".join(contents)
     
     @override
     def get_tool(self) -> StructuredTool:

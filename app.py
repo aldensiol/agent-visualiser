@@ -18,8 +18,8 @@ async def set_starters():
             icon="https://www.svgrepo.com/show/427306/fitness-workout-healthy.svg",
             ),
         cl.Starter(
-            label="Complex Diet & Exercise Plan",
-            message="Design a 4-week exercise plan for a newly diagnosed type 2 diabetic who is overweight and has mild hypertension. Include a progressive exercise routine, balanced diet, blood sugar monitoring schedule, stress management techniques, and lifestyle modifications. Explain how each element helps manage diabetes, promotes weight loss, and improves heart health.",
+            label="Sleep Deprivation Effects",
+            message="what are the potential long-term neurological and cardiovascular effects of chronic sleep deprivation in shift workers, particularly those in healthcare professions.",
             icon="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRtc4e90qSf97_dpcWCXKHDGI4wuUnmLnnmWg&s",
             )
         ]
