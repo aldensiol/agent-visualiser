@@ -122,9 +122,8 @@ async def send_agent_message(agent_type: str, retrieved_context: Optional[str], 
             await cl.Message(content=agent_type, elements=context_element).send()
             
             source_elements = get_source_elements(retrieved_context) if agent_type != "Websearch Agent" else []
-            # for elem in source_elements:
-            #     await cl.Message(content=elem.name, elements=[elem]).send()
-            await cl.Message(content="PDF Source Material", elements=source_elements).send()
+            if source_elements:
+                await cl.Message(content="Source Materials", elements=source_elements).send()
         else:
             await cl.Message(content=f"No context available for {agent_type}").send()
 

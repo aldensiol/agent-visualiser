@@ -1,6 +1,8 @@
 import os
+import re
 
 from abc import abstractmethod
+from bs4 import BeautifulSoup
 from crawl4ai import AsyncWebCrawler
 from langchain_anthropic import ChatAnthropic
 from langchain_core.output_parsers import JsonOutputParser, StrOutputParser
@@ -195,6 +197,78 @@ class WebSearchTool(BaseRetrievalTool):
     def __init__(self):
         super().__init__(name="Retrieve from Web Search", 
                          description="Retrieves context from a Web Search, given a query.")
+
+    def clean_content(self, content: str) -> str:
+        """
+        Clean the lowercase content by removing boilerplate text, headers, and irrelevant information.
+        """
+        # Remove HTML tags
+        soup = BeautifulSoup(content, 'html.parser')
+        
+        # Remove script and style elements
+        for script in soup(["script", "style"]):
+            script.decompose()
+        
+        text = soup.get_text()
+
+        # Remove headers and footers (common patterns)
+        text = re.sub(r'^.*?(?=\n\n)', '', text, flags=re.DOTALL)  # Remove top header
+        text = re.sub(r'\n\n.*?$', '', text, flags=re.DOTALL)  # Remove bottom footer
+
+        # Remove navigation-like patterns
+        text = re.sub(r'\n[^\n]+(?:\n[^\n]+){2,5}$', '', text)  # Remove bottom navigation-like text
+        text = re.sub(r'^\s*(?:[a-z]+(?:\s[a-z]+)*\s*\n){2,}', '', text)  # Remove top navigation-like text
+
+        # Remove image descriptions and URLs
+        text = re.sub(r'\[.*?\]', '', text)  # Remove text in square brackets (often image descriptions)
+        text = re.sub(r'https?://\S+', '', text)  # Remove URLs
+
+        # Remove extra whitespace and newlines
+        text = re.sub(r'\s+', ' ', text).strip()
+
+        # Remove common boilerplate phrases (adjusted for lowercase)
+        boilerplate_patterns = [
+            r'copyright ©.*',
+            r'all rights reserved',
+            r'terms (of use|and conditions)',
+            r'privacy policy',
+            r'cookie policy',
+            r'(log|sign) (in|out|up)',
+            r'subscribe to our newsletter',
+            r'follow us on social media',
+            r'back to top',
+            r'skip to (main content|navigation)',
+            r'search',
+            r'menu',
+            r'home',
+            r'about( us)?',
+            r'contact( us)?',
+        ]
+        for pattern in boilerplate_patterns:
+            text = re.sub(pattern, '', text)
+
+        # Remove common email patterns
+        text = re.sub(r'\S+@\S+\.\S+', '', text)
+
+        # Remove patterns like "page 1 of 10"
+        text = re.sub(r'page \d+ of \d+', '', text)
+
+        # Remove patterns like "last updated: date"
+        text = re.sub(r'last updated:?\s*\d{1,2}[-/]\d{1,2}[-/]\d{2,4}', '', text)
+
+        # Remove numeric references often used in academic papers
+        text = re.sub(r'\[\d+\]', '', text)
+
+        # Try to extract main content (if it starts with a header)
+        main_content = re.split(r'^#', text, maxsplit=1)
+        if len(main_content) > 1:
+            text = f"#{main_content[1]}"
+
+        # Final cleanup: remove any leading/trailing whitespace and multiple consecutive spaces
+        text = re.sub(r'\s+', ' ', text).strip()
+
+        return text
+
         
     async def websearch(self, query: str, num_results: int = 3) -> str:
         """
@@ -207,7 +281,7 @@ class WebSearchTool(BaseRetrievalTool):
         Returns:
             str: The formatted context retrieved from the websearch
         """
-        print("------ Websearching ------")
+        print("------- Retrieving Context Via Web Search -------")
         # Use SerpAPI to get search results
         params = {
             "q": query,
@@ -227,10 +301,11 @@ class WebSearchTool(BaseRetrievalTool):
                 result = await crawler.arun(url=url)
             
             # Extract relevant information from the crawled content
-            content = result.markdown[:3000]  # Limit to first 1000 characters
+            content = self.clean_content(result.markdown.lower())
+            content = content[:3000]
             contents.append(f"URL: {url}\nContent:\n{content}\n\n")
 
-        return "\n".join(contents)
+        return "".join(contents)
     
     @override
     def get_tool(self) -> StructuredTool:
