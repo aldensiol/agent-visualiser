@@ -9,7 +9,7 @@ GENERATE_ANSWER_PROMPT = """<system>
     4. Completeness: Ensure the answer covers all aspects of the query as much as possible based on the provided context.
     5. Neutral and Informative Tone: Provide the answer in a neutral, professional tone, ensuring factual accuracy.
     6. Stay Direct and Focused: Provide a straightforward answer without any introductory remarks, elaborations, or additional comments that do not pertain to the query.
-    7. Do not include sentences such as: "Based on the context".
+    7. Do not include sentences such as: "Based on the context" or "Based on the information provided".
     </instruction>
     
     <query>
@@ -26,31 +26,27 @@ GENERATE_ANSWER_PROMPT = """<system>
     """
     
 GRADE_ANSWER_PROMPT = """<system>
-    You are an expert evaluator specializing in assessing the quality of text responses based on specific criteria. Your task is to critically evaluate a given answer to a query and provide a detailed assessment and scoring for each of the criteria outlined below.
+    You are an expert evaluator specializing in critically assessing the quality of text responses based on specific criteria. Your role is to provide detailed and evidence-based evaluations for each criterion below.
     </system>
 
     <instructions>
-    - Evaluation Criteria: Assess the provided answer according to the following four metrics: 
-    1. Answer Relevancy: Evaluate how closely the answer addresses the query. Consider whether the answer is directly relevant, partially relevant, or irrelevant.
-    2. Completeness: Assess whether the answer provides a comprehensive response. Does it cover all necessary aspects of the topic in sufficient detail, or are there important points missing?
-    3. Clarity and Coherence: Review the answer for logical flow, readability, and overall coherence. Is the information presented in a clear and organized manner, or are there confusing or disjointed elements?
-    4. Correctness: Check the factual accuracy of the information provided. Are there any inaccuracies, errors, or misleading statements in the answer?
+    - Evaluation Criteria: Assess the provided answer according to the following four metrics:
+    1. Answer Relevancy: Focus on how directly the answer addresses the query. If the answer mentions a lack of relevant context or fails to engage with the query (even partially), it should be rated low. Full engagement with the query should be rewarded, even in the face of limited context.
+    2. Completeness: Evaluate whether the answer provides a comprehensive response. If the answer avoids critical aspects of the query, such as by deflecting with statements like "the context does not provide enough information," mark it down heavily. The answer should attempt to provide all necessary details, even if they are inferred.
+    3. Clarity and Coherence: Review the logical flow, structure, and readability of the answer. Is it clearly written, logically organized, and easy to follow? Even if the content is incorrect, clarity of presentation should still be considered.
+    4. Correctness: Fact-check the information. Are there any inaccuracies, errors, or misleading statements in the answer? Any significant factual mistakes should result in a low score.
 
-    - Scoring System: Assign a numerical score from 1 to 10 for each metric, where 1 is the lowest and 10 is the highest. Scores must be integers without decimal values.
+    - Scoring System: Assign a numerical score from 1 to 10 for each metric (with 1 being the lowest and 10 being the highest). Use only whole numbers.
 
-    - Detailed Explanation: For each metric, provide a detailed explanation justifying the assigned score. The explanation should refer to specific parts of the answer and use evidence-based reasoning to support the score given.
+    - Detailed Explanation: For each metric, provide a detailed explanation justifying the score. Refer to specific parts of the answer to explain why it scored high or low, using evidence-based reasoning.
 
-    - Output Format: Return your evaluation in the exact JSON format provided below. Ensure that all fields are correctly filled and formatted as specified.
+    - Output Format: Return the evaluation strictly in the JSON format below. Ensure that all fields are correctly filled, and the format is followed exactly as specified.
 
-    - Formatting Guidelines: Do not include any additional information, preamble, or explanations beyond what is asked. Adhere strictly to the output format to ensure consistency.
+    - Guidelines: 
+        1. Penalize answers that deflect or fail to engage with the query.
+        2. Answers should receive low marks on Relevancy and Completeness if they simply point out insufficient context rather than attempting to address the question.
+        3. Strictly follow the output format and ensure there are no deviations from the requested structure.
     </instructions>
-
-    <metrics>
-    1. Answer Relevancy: How directly does the answer address the query provided?
-    2. Completeness: Does the answer provide a full and detailed response to the question?
-    3. Clarity and Coherence: Is the answer clearly written, well-organized, and easy to follow?
-    4. Correctness: Are all the statements in the answer factually correct and free from errors?
-    </metrics>
 
     <query>
     {query}

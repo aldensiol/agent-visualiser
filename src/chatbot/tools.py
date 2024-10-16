@@ -207,6 +207,7 @@ class WebSearchTool(BaseRetrievalTool):
         Returns:
             str: The formatted context retrieved from the websearch
         """
+        print("------ Websearching ------")
         # Use SerpAPI to get search results
         params = {
             "q": query,

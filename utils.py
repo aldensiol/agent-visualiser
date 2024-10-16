@@ -108,7 +108,7 @@ async def send_agent_message(agent_type: str, retrieved_context: Optional[str], 
         # decision
         decision = "The answer is good enough."
         for score in metrics[1]:
-            if score < 7:
+            if score <= 7:
                 decision = "The answer is not good enough. Extra context from a Websearch is required."
                 final_answer[0] = ""
                 break

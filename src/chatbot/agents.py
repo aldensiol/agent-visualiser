@@ -187,9 +187,9 @@ def decide_metrics_agent(state: GraphState) -> GraphState:
     """
     
     print("------- Deciding If Requires Extra Context from KG -------")
-    metric_list = [state["metrics"]["relevance"], state["metrics"]["completeness"], state["metrics"]["coherence"], state["metrics"]["correctness"]]
-    print(f"Metrics: {metric_list}")
-    for metric in metric_list:
-        if metric <= 7:
-            "not good enough"
+    metrics_scores = state["metrics"]
+    print(f"Metric Scores: {metrics_scores}")
+    for metric, score in metrics_scores.items():
+        if score <= 7:
+            return "not good enough"
     return "good"
