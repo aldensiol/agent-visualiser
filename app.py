@@ -1,7 +1,7 @@
 import chainlit as cl
 
 from src.chatbot.input import BASE_INPUTS
-from src.chatbot.workflow import graph
+from src.chatbot.workflow import full_graph
 from utils import *
 
 @cl.set_starters
@@ -26,7 +26,7 @@ async def set_starters():
     
 @cl.on_chat_start
 async def on_chat_start():
-    cl.user_session.set("graph", graph)
+    cl.user_session.set("graph", full_graph)
 
 @cl.on_message
 async def on_message(message: cl.Message):
