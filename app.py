@@ -2,7 +2,7 @@ import chainlit as cl
 
 from src.chatbot.input import BASE_INPUTS
 from src.chatbot.workflow import full_graph
-from utils import *
+from utils import handle_messages, handle_updates
 
 @cl.set_starters
 async def set_starters():
