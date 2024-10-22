@@ -87,8 +87,10 @@ This chatbot serves as both a personal learning tool and an educational platform
     │   ├── chatbot/                         # Chatbot logic and related scripts
     │   │   ├── prompts/                     # Contains prompt templates and initialisations
     │   │   │   ├── prompts.py               # Script for handling chatbot prompts
-    │   │   ├── agents.py                    # Defines various agent behaviors
-    │   │   ├── utils.py                     # Utility functions for the chatbot
+    │   │   ├── agents.py                    # Various agent behaviors when interacting with State
+    │   │   ├── input.py                     # Stores BASE_INPUT
+    │   │   ├── state.py                     # Define GraphState and Keys
+    │   │   ├── tools.py                     # Abstracted Structured Tools
     │   │   ├── workflow.py                  # Workflow management for the chatbot processes
     │   │   └── __init__.py                 
     │   │
@@ -109,11 +111,7 @@ This chatbot serves as both a personal learning tool and an educational platform
     │   │   ├── __init__.py                 
     │   │   └── services.py                  # Core service implementations
     │   │
-    │   ├── ui/                              # User interface components
-    │   │   ├── __init__.py                  
-    │   │   └── components.py                # UI components used in the Streamlit app
-    │   │
-    │   ├── utils/                           # Vector database management (Zilliz/Milvus)
+    │   ├── utils/                           # Helper Functions
     │   │   ├── __init__.py                  
     │   │   └── utils.py                     # Utility Functions for Document Parsing
     │   │
