@@ -54,10 +54,13 @@ This chatbot serves as both a personal learning tool and an educational platform
     SERPAPI_API_KEY="" # for Websearch 
 
 4. **Create Endpoints for Document Uploading**
+    a. Within Postman, create endpoints specified with `/api/...`
+    b. e.g., `/api/upload-vector`
+
     ```json
     {
-        file_location="..." 
-        data_folder="..." # Optional
+        file_location"" 
+        data_folder=""
     }
     ```
 
@@ -68,7 +71,9 @@ This chatbot serves as both a personal learning tool and an educational platform
 
 3. **Run the Streamlit App**
     ```
-    chainlit run app.py -w
+    chainlit run app.py -w # enables reload
+    OR
+    chainlit run app.py # no reload
 
 ## 🌐 Project Structure
     STREAMLIT-AGENT/
