@@ -1,0 +1,12 @@
+**Relevance**: **2/10**
+The answer is barely relevant to the query. it immediately states that the provided context does not contain information about the topic asked. while this honesty is appreciated, it fails to engage with the question at all, resulting in a very low relevance score.
+
+**Completeness**: **1/10**
+The answer is entirely incomplete. it does not attempt to address any aspect of the question about long-term neurological and cardiovascular effects of chronic sleep deprivation in shift workers. instead, it simply states a lack of information and mentions unrelated topics like diabetes management. this complete failure to engage with the query results in the lowest possible completeness score.
+
+**Coherence**: **8/10**
+Despite its lack of relevance and completeness, the answer is clearly written and logically structured. it clearly communicates what information is (and isn't) available in the context. the sentence structure and flow are appropriate, making it easy to understand.
+
+**Correctness**: **9/10**
+The information provided in the answer appears to be factually correct. it accurately states that the context does not contain the requested information and correctly identifies the topics that are present in the context (diabetes management, pre-diabetes, and insulin therapy). while it doesn't address the query, what it does say is not incorrect.
+

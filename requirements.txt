@@ -1,0 +1,17 @@
+langchain-core
+typing-extensions
+asyncio
+beautifulsoup4
+crawl4ai
+langchain-anthropic
+pymilvus
+google-search-results
+langgraph
+llama-index
+pydantic
+fastembed
+llama-parse
+neo4j
+fastapi
+uvicorn
+chainlit
