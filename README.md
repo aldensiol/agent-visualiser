@@ -59,6 +59,7 @@ This chatbot serves as both a personal learning tool and an educational platform
         file_location="..." 
         data_folder="..." # Optional
     }
+    ```
 
 5. **Ingest Documents**
     ```
