@@ -54,7 +54,7 @@ edit_message = true
 
 [UI]
 # Name of the assistant.
-name = "Agent--Visualiser"
+name = "Agent-Visualiser"
 
 # Description of the assistant. This is used for HTML tags.
 # description = ""

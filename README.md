@@ -71,7 +71,7 @@ This chatbot serves as both a personal learning tool and an educational platform
     cd src
     python run main.py
 
-3. **Run the Streamlit App**
+6. **Run the Streamlit App**
     ```
     chainlit run app.py -w # enables reload
     OR
