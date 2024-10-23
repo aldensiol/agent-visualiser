@@ -1,8 +1,9 @@
 import asyncio
 import os
 import re
+import time
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
 from crawl4ai import AsyncWebCrawler
 from langchain_anthropic import ChatAnthropic
@@ -13,34 +14,43 @@ from pymilvus import (
    AnnSearchRequest, RRFRanker,
 )
 from serpapi import GoogleSearch
+from tenacity import retry, stop_after_attempt, wait_exponential
 from typing_extensions import override
 
 from src.chatbot.prompts.prompts import GENERATE_ANSWER_PROMPT, GRADE_ANSWER_PROMPT, REFINE_ANSWER_PROMPT
 from src.services.services import collection, kg_retriever, llm
 from src.services.embedding_models import bge_embed_model, splade_embed_model
 
-class BaseTool:
-    def __init__(self):
-        self.name = "BaseTool"
-        self.description = "Base class for all tools"
-    
-    @abstractmethod
-    def get_tool(self) -> StructuredTool:
-        pass
-
-class BaseRetrievalTool(BaseTool):
-    def __init__(self, name: str = "BaseRetrievalTool", 
-                 description: str = "Base class for Retrieval tools"):
+class BaseTool(ABC):
+    def __init__(self, name: str, description: str):
         self.name = name
         self.description = description
+    
+    @abstractmethod
+    def func(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    async def coroutine(self, *args, **kwargs):
+        pass
+
+    def get_tool(self) -> StructuredTool:
+        return StructuredTool.from_function(
+            func=self.func,
+            coroutine=self.coroutine,
+            name=self.name,
+            description=self.description
+        )
+
+class BaseRetrievalTool(BaseTool):
+    pass
 
 class BaseGenerationTool(BaseTool):
     def __init__(self, prompt: str, 
                  llm: ChatAnthropic = llm, 
-                 name: str = "BaseGenerationTool", 
-                 description: str = "Base class for Generation tools"):
-        self.name = name
-        self.description = description
+                 name: str = "Base Generation Tool", 
+                 description: str = "Base Class for Generation Tools"):
+        super().__init__(name, description)
         self.llm = llm
         self.prompt = prompt
         self.prompt_template = None
@@ -50,7 +60,7 @@ class DBRetrievalTool(BaseRetrievalTool):
     def __init__(self):
         super().__init__(name="Retrieve from Vector DB", 
                          description="Retrieves context from a conventional Vector DB, given a query.")
-        
+
     def retrieve_db(self, query: str) -> str:
         """
         Retrieves context from a conventional Vector DB, given a query.
@@ -140,13 +150,12 @@ class DBRetrievalTool(BaseRetrievalTool):
         return "\n\n".join(context)
     
     @override
-    def get_tool(self) -> StructuredTool:
-        return StructuredTool.from_function(
-            func=self.retrieve_db, 
-            coroutine=self.retrieve_db_async,
-            name=self.name,
-            description=self.description
-        )
+    def func(self, query: str) -> str:
+        return self.retrieve_db(query)
+
+    @override
+    async def coroutine(self, query: str) -> str:
+        return await self.retrieve_db_async(query)
         
 class KGRetrievalTool(BaseRetrievalTool):
     def __init__(self):
@@ -186,13 +195,12 @@ class KGRetrievalTool(BaseRetrievalTool):
         return context
     
     @override
-    def get_tool(self) -> StructuredTool:
-        return StructuredTool.from_function(
-            func=self.retrieve_kg, 
-            coroutine=self.retrieve_kg_async,
-            name=self.name,
-            description=self.description
-        )
+    def func(self, query: str) -> str:
+        return self.retrieve_kg(query)
+
+    @override
+    async def coroutine(self, query: str) -> str:
+        return await self.retrieve_kg_async(query)
 
 class WebSearchTool(BaseRetrievalTool):
     def __init__(self):
@@ -293,15 +301,14 @@ class WebSearchTool(BaseRetrievalTool):
            contents.append(f"URL: {url}\nContent:\n{content}\n\n")
 
        return "".join(contents)
+   
+    @override
+    def func(self, query: str) -> str:
+        return self.websearch(query)
     
     @override
-    def get_tool(self) -> StructuredTool:
-        return StructuredTool.from_function(
-            func=self.websearch,
-            coroutine=self.websearch,
-            name=self.name,
-            description=self.description
-        )
+    async def coroutine(self, query: str) -> str:
+        return await self.websearch(query)
         
 class AnswerGenerationTool(BaseGenerationTool):
     def __init__(self):
@@ -314,7 +321,8 @@ class AnswerGenerationTool(BaseGenerationTool):
         )
         self.chain = self.prompt_template | self.llm | StrOutputParser()
     
-    async def generate_answer(self, query: str, context: str) -> str:
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+    def generate_answer(self, query: str, context: str) -> str:
         """
         Generates an answer to the user query from the Vector DB context
 
@@ -325,18 +333,49 @@ class AnswerGenerationTool(BaseGenerationTool):
         Returns:
             str: The answer generated by the agent
         """
-        
-        response = await self.chain.ainvoke({"query": query, "context": context})
-        return response
+        try:
+            response = self.chain.invoke({"query": query, "context": context})
+            return response
+        except Exception as e:
+            if "overloaded_error" in str(e):
+                print("Anthropic API is overloaded. Retrying...")
+                time.sleep(2)  # Add a small delay before retry
+                raise # Re-raise the exception to trigger a retry
+            
+            else:
+                raise
+    
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+    async def generate_answer_async(self, query: str, context: str) -> str:
+        """
+        Generates an answer to the user query from the Vector DB context
+
+        Args:
+            query (str): The user query
+            context (str): The context retrieved from the Vector DB
+
+        Returns:
+            str: The answer generated by the agent
+        """
+        try:
+            response = await self.chain.ainvoke({"query": query, "context": context})
+            return response
+        except Exception as e:
+            if "overloaded_error" in str(e):
+                print("Anthropic API is overloaded. Retrying...")
+                time.sleep(2)  # Add a small delay before retry
+                raise # Re-raise the exception to trigger a retry
+            
+            else:
+                raise
     
     @override
-    def get_tool(self) -> StructuredTool:
-        return StructuredTool.from_function(
-            func=self.generate_answer, 
-            coroutine=self.generate_answer,
-            name=self.name,
-            description=self.description
-        )
+    def func(self, query: str, context: str) -> str:
+        return self.generate_answer(query, context)
+    
+    @override
+    async def coroutine(self, query: str, context: str) -> str:
+        return await self.generate_answer_async(query, context)
 
 class GradeAnswerTool(BaseGenerationTool):
     def __init__(self):
@@ -348,7 +387,8 @@ class GradeAnswerTool(BaseGenerationTool):
             template=self.prompt
         )
         self.chain = self.prompt_template | self.llm | JsonOutputParser()
-        
+    
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     def grade_answer(self, query: str, answer: str) -> dict:
         """
         Grades the answer based on relevancy, completeness, coherence, and correctness
@@ -360,10 +400,19 @@ class GradeAnswerTool(BaseGenerationTool):
         Returns:
             dict: The evaluation metrics and reasoning for the graded answer
         """
-        
-        response = self.chain.invoke({"query": query, "answer": answer})
-        return response
+        try:
+            response = self.chain.invoke({"query": query, "answer": answer})
+            return response
+        except Exception as e:
+            if "overloaded_error" in str(e):
+                print("Anthropic API is overloaded. Retrying...")
+                time.sleep(2)  # Add a small delay before retry
+                raise # Re-raise the exception to trigger a retry
+            
+            else:
+                raise
     
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     async def grade_answer_async(self, query: str, answer: str) -> dict:
         """
         Grades the answer based on relevancy, completeness, coherence, and correctness
@@ -375,18 +424,26 @@ class GradeAnswerTool(BaseGenerationTool):
         Returns:
             dict: The evaluation metrics and reasoning for the graded answer
         """
+        try:
+            response = await self.chain.ainvoke({"query": query, "answer": answer})
+            return response
         
-        response = await self.chain.ainvoke({"query": query, "answer": answer})
-        return response
+        except Exception as e:
+            if "overloaded_error" in str(e):
+                print("Anthropic API is overloaded. Retrying...")
+                time.sleep(2)  # Add a small delay before retry
+                raise # Re-raise the exception to trigger a retry
+            
+            else:
+                raise
     
     @override
-    def get_tool(self) -> StructuredTool:
-        return StructuredTool.from_function(
-            func=self.grade_answer, 
-            coroutine=self.grade_answer_async,
-            name=self.name,
-            description=self.description
-        )
+    def func(self, query: str, answer: str) -> dict:
+        return self.grade_answer(query, answer)
+    
+    @override
+    async def coroutine(self, query: str, answer: str) -> dict:
+        return await self.grade_answer_async(query, answer)
 
 class RefineAnswerTool(BaseGenerationTool):
     def __init__(self):
@@ -398,8 +455,35 @@ class RefineAnswerTool(BaseGenerationTool):
             template=self.prompt
         )
         self.chain = self.prompt_template | self.llm | StrOutputParser()
+        
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+    def refine_answer(self, query: str, answer: str, websearch_context: str) -> str:
+        """
+        Refines the answer based on user feedback
+
+        Args:
+            query (str): The user query
+            answer (str): The answer generated by the agent
+            feedback (str): The user feedback on the answer
+
+        Returns:
+            str: The refined answer based on the user feedback
+        """
+        try:
+            response = self.chain.invoke({"query": query, "answer": answer, "websearch_context": websearch_context})
+            return response
+        
+        except Exception as e:
+            if "overloaded_error" in str(e):
+                print("Anthropic API is overloaded. Retrying...")
+                time.sleep(2)  # Add a small delay before retry
+                raise # Re-raise the exception to trigger a retry
+            
+            else:
+                raise
     
-    async def refine_answer(self, query: str, answer: str, websearch_context: str) -> str:
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+    async def refine_answer_async(self, query: str, answer: str, websearch_context: str) -> str:
         """
         Refines the answer based on user feedback
 
@@ -412,14 +496,23 @@ class RefineAnswerTool(BaseGenerationTool):
             str: The refined answer based on the user feedback
         """
         
-        response = await self.chain.ainvoke({"query": query, "answer": answer, "websearch_context": websearch_context})
-        return response
+        try:
+            response = await self.chain.ainvoke({"query": query, "answer": answer, "websearch_context": websearch_context})
+            return response
+    
+        except Exception as e:
+            if "overloaded_error" in str(e):
+                print("Anthropic API is overloaded. Retrying...")
+                time.sleep(2)  # Add a small delay before retry
+                raise # Re-raise the exception to trigger a retry
+            
+            else:
+                raise
     
     @override
-    def get_tool(self) -> StructuredTool:
-        return StructuredTool.from_function(
-            func=self.refine_answer, 
-            coroutine=self.refine_answer,
-            name=self.name,
-            description=self.description
-        )
+    def func(self, query: str, answer: str, websearch_context: str) -> str:
+        return self.refine_answer(query, answer, websearch_context)
+    
+    @override
+    async def coroutine(self, query: str, answer: str, websearch_context: str) -> str:
+        return await self.refine_answer(query, answer, websearch_context)
