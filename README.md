@@ -6,7 +6,7 @@ Welcome to the **Agent-Visualiser**! This project is designed as a visual and in
 
 This chatbot serves as both a personal learning tool and an educational platform to ease the introduction to others about **Agentic workflows** and **RAG systems**. It is built using **Chainlit** to provide an intuitive interface with cool visualisations that illustrate how agents think, reason, and make decisions in real time.
 
-![Alt text](/images/Iterative_Workflow.drawio.png "Iterative Workflow")
+![Architecture Diagram](/images/Iterative_Workflow.drawio.png "Architecture Diagram")
 
 ### Key Features
 
@@ -76,6 +76,25 @@ This chatbot serves as both a personal learning tool and an educational platform
     chainlit run app.py -w # enables reload
     OR
     chainlit run app.py # no reload
+    ```
+
+### Example UI && Workflow
+
+After running the command, your default web browser should open automatically, displaying the interface. If it doesn't, you can manually open a browser and navigate to `http://localhost:8000` (or whichever port is specified in the terminal output).
+
+Here's an example of what the frontend interface might look like, assuming you didn't change the cl.starters:
+
+![Frontend Interface](images/tg_image_585239677.png)
+
+In this interface, you can interact with your AI assistant, ask questions, and see the responses in real-time.
+
+![Context Retrieved](images/context_retrieved.png)
+
+Here you can see an example of how the Context Retrieved from both Vector and KG DBs are displayed.
+
+![Evaluation](images/evaluation.png)
+
+And finally, here you can see an example of the Evaluation from the grading agent.
 
 ## 🌐 Project Structure
     STREAMLIT-AGENT/
